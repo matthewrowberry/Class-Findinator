@@ -9,12 +9,13 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="/Leaflet/dist/leaflet.css"></link>
     <script src="/Leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="map.js" defer></script>
 </head>
 <body>
     <header>
         <h1> behold the class findinator </h1>
-        <form action="/search" method="GET">
+        <form id="search_bar" action="/search" method="GET">
             <input type="text" name="query" placeholder="Search..." />
             <button type="submit">Search</button>
         </form>
@@ -23,9 +24,13 @@
     <main> 
         <aside id="sidebar">
         <h1>This is the side bar</h1>
-
+        <button id="side_button" onclick="">STC</button>
+        <button id="side_button" onclick="">something</button>
+        <button id="side_button" onclick="">something</button>
+        <button id="side_button" onclick="">something</button>
         </aside>
         <div id="map"></div>
+        <img src="/img/1.png">
     </main>
     <footer>
 

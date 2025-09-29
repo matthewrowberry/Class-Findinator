@@ -4,11 +4,32 @@ header {
     padding: 10px;
     text-align: left;
     font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+#sidebar {
+    background-color: #7776a1;
+    color: white;
+    padding: 15px;
+    width: 20%;
+    float: left;
+    box-sizing: border-box;
+    height: 400px;
+}
+
+#side_button {
+    background-color : black;
+    color:white;
+    width: 100%
+}
+#search_bar{
+    box-sizing: border-box;
+    float: right;
 }
 
 #map {
     height: 400px
 }
 img {
-    height: 2%;
+    height: 50%;
 }
