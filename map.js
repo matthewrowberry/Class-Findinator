@@ -1,4 +1,4 @@
-var map = L.map('map').setView([43.814654, -111.784797], 19);
+var map = L.map('map', { drawControl: true }).setView([43.814654, -111.784797], 19);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -76,27 +76,3 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 
-// Add the draw control (this enables the toolbar)
-var drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
-var drawControl = new L.Control.Draw({
-    position: 'topleft',
-    draw: {
-        polygon: true,
-        polyline: true,
-        circle: true,
-        rectangle: true,
-        marker: true,
-        circlemarker: false
-    },
-    edit: {
-        featureGroup: drawnItems
-    }
-});
-map.addControl(drawControl);
-
-// Event handlers (optional)
-map.on(L.Draw.Event.CREATED, function (event) {
-    var layer = event.layer;
-    drawnItems.addLayer(layer);
-});
