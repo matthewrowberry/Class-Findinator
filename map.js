@@ -48,14 +48,14 @@ document.getElementById('down').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 document.getElementById('left').addEventListener('click', function () {
-    imageBounds[0][1] += 0.000001;
-    imageBounds[1][1] += 0.000001;
+    imageBounds[0][1] -= 0.000001;
+    imageBounds[1][1] -= 0.000001;
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 document.getElementById('right').addEventListener('click', function () {
-    imageBounds[0][1] -= 0.000001;
-    imageBounds[1][1] -= 0.000001;
+    imageBounds[0][1] += 0.000001;
+    imageBounds[1][1] += 0.000001;
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
@@ -76,3 +76,40 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 
+document.getElementById('tallendown').addEventListener('click', function () {
+    imageBounds[0][0] -= 0.000001;
+    imageBounds[1][0] += 0.000001;
+
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+
+document.getElementById('widendown').addEventListener('click', function () {
+
+    imageBounds[0][1] += 0.000001;
+    imageBounds[1][1] -= 0.000001;
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+
+document.getElementById('tallenup').addEventListener('click', function () {
+    imageBounds[0][0] += 0.000001;
+    imageBounds[1][0] -= 0.000001;
+
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+
+document.getElementById('widenup').addEventListener('click', function () {
+
+    imageBounds[0][1] -= 0.000001;
+    imageBounds[1][1] += 0.000001;
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+
+
+function overlaySave(){
+    //generate json
+    
+}
