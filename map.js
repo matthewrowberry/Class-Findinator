@@ -76,29 +76,3 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 
-const geoJson ={
-    type: "FeatureCollection",
-    features: [
-        {
-            type: "Feature",
-            geometry: {
-                type: "Point",
-                coordinates: [102.0, 0.5]
-            },
-            properties:{
-                name: "Example Point",
-            },
-        },
-    ],
-}
-
-const geoJsonStr = JSON.stringify(geoJson, null, 2)
-
-const blob = new Blob([geoJsonStr], { type: "application/json" })
-
-const link = document.createElement("a")
-link.href = URL.createObjectURL(blob)
-link.download = "data.geojson"
-link.click()
-
-URL.revokeObjectURL(link.href)
