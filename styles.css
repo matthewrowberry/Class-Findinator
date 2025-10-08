@@ -17,7 +17,7 @@ header {
     width: 20%;
     float: left;
     box-sizing: border-box;
-    height: 400px;
+    height: 600px;
 }
 
 #side_button {
@@ -33,7 +33,7 @@ header {
 }
 
 #map {
-    height: 400px
+    height: 580px
 }
 img {
     height: 50%;
