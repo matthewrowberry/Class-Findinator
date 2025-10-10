@@ -25,6 +25,21 @@ header {
     color:white;
     width: 100%
 }
+#STCButton {
+    background-color : black;
+    color:white;
+    width: 100%
+}
+#RicksButton {
+    background-color : black;
+    color:white;
+    width: 100%
+}
+#ManwaringCenterButton {
+    background-color : black;
+    color:white;
+    width: 100%
+}
 #search_bar{
     box-sizing: border-box;
     margin-left: auto;

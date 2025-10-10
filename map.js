@@ -8,9 +8,9 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 //tools controls
 
 
-L.marker([43.814672, -111.784795]).addTo(map)
-    .bindPopup('The Science and Technology Center<br> What is your class?')
-    .openPopup();
+// L.marker([43.814672, -111.784795]).addTo(map)
+//     .bindPopup('The Science and Technology Center<br> What is your class?')
+//     .openPopup();
 
 
 var imageUrl = '/img/1st Floor.png',
@@ -75,6 +75,21 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
+document.getElementById('STCButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.814672, -111.784795, "STC Building");
+    });
+});
+document.getElementById('RicksButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.814859537991715, -111.78104934795863, "Ricks Building");
+    });
+});
+document.getElementById('ManwaringCenterButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.81843055825238, -111.78261029361335, "Manwaring Center");
+    });
+});
 
 
 const geoJson ={
@@ -103,3 +118,13 @@ link.download = "data.geojson"
 link.click()
 
 URL.revokeObjectURL(link.href)
+
+function AddMarker(lat, lng, markername) {
+    L.marker([lat, lng]).addTo(map)
+    .bindPopup(markername)
+    .openPopup();
+    map.flyTo([lat, lng], 19, {
+            animate: true,
+            duration: 1.5
+        });
+}
