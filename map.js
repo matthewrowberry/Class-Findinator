@@ -1,7 +1,7 @@
 var map = L.map('map', { drawControl: true }).setView([43.814654, -111.784797], 19);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 25,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
@@ -108,8 +108,18 @@ document.getElementById('widenup').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 
+document.getElementById('save').addEventListener('click', function () {
+    overlaySave();
+});
 
-function overlaySave(){
+function overlaySave() {
     //generate json
-    
+
+
+    fetch("files.json")
+        .then(response => response.json()) // Parse response as JSON
+        .then(data => console.log(data))  // Handle the data
+        .catch(error => console.error('Error:', error));
+
+
 }
