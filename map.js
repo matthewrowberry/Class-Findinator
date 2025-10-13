@@ -8,9 +8,9 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 //tools controls
 
 
-L.marker([43.814672, -111.784795]).addTo(map)
-    .bindPopup('The Science and Technology Center<br> What is your class?')
-    .openPopup();
+// L.marker([43.814672, -111.784795]).addTo(map)
+//     .bindPopup('The Science and Technology Center<br> What is your class?')
+//     .openPopup();
 
 
 var imageUrl = '/img/1st Floor.png',
@@ -48,14 +48,14 @@ document.getElementById('down').addEventListener('click', function () {
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 document.getElementById('left').addEventListener('click', function () {
-    imageBounds[0][1] -= 0.000001;
-    imageBounds[1][1] -= 0.000001;
+    imageBounds[0][1] += 0.000001;
+    imageBounds[1][1] += 0.000001;
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 document.getElementById('right').addEventListener('click', function () {
-    imageBounds[0][1] += 0.000001;
-    imageBounds[1][1] += 0.000001;
+    imageBounds[0][1] -= 0.000001;
+    imageBounds[1][1] -= 0.000001;
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
@@ -75,38 +75,61 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-
-document.getElementById('tallendown').addEventListener('click', function () {
-    imageBounds[0][0] -= 0.000001;
-    imageBounds[1][0] += 0.000001;
-
-    map.removeLayer(image);
-    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+document.getElementById('STCButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.814672, -111.784795, "STC Building");
+    });
+});
+document.getElementById('RicksButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.814859537991715, -111.78104934795863, "Ricks Building");
+    });
+});
+document.getElementById('ManwaringCenterButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        AddMarker(43.81843055825238, -111.78261029361335, "Manwaring Center");
+    });
 });
 
-document.getElementById('widendown').addEventListener('click', function () {
 
-    imageBounds[0][1] += 0.000001;
-    imageBounds[1][1] -= 0.000001;
-    map.removeLayer(image);
-    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
-});
+const geoJson ={
+    type: "FeatureCollection",
+    features: [
+        {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [102.0, 0.5]
+            },
+            properties:{
+                name: "Example Point",
+            },
+        },
+    ],
+}
 
-document.getElementById('tallenup').addEventListener('click', function () {
-    imageBounds[0][0] += 0.000001;
-    imageBounds[1][0] -= 0.000001;
+const geoJsonStr = JSON.stringify(geoJson, null, 2)
 
-    map.removeLayer(image);
-    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
-});
+const blob = new Blob([geoJsonStr], { type: "application/json" })
 
-document.getElementById('widenup').addEventListener('click', function () {
+const link = document.createElement("a")
+link.href = URL.createObjectURL(blob)
+link.download = "data.geojson"
+link.click()
 
-    imageBounds[0][1] -= 0.000001;
-    imageBounds[1][1] += 0.000001;
-    map.removeLayer(image);
-    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
-});
+URL.revokeObjectURL(link.href)
+
+function AddMarker(lat, lng, markername) {
+    L.marker([lat, lng]).addTo(map)
+    .bindPopup(markername)
+    .openPopup();
+    map.flyTo([lat, lng], 19, {
+            animate: true,
+            duration: 1.5
+        });
+}
+
+
 
 document.getElementById('save').addEventListener('click', function () {
     overlaySave();
@@ -121,5 +144,3 @@ function overlaySave() {
         .then(data => console.log(data))  // Handle the data
         .catch(error => console.error('Error:', error));
 
-
-}
