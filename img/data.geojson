@@ -6,12 +6,12 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          102,
-          0.5
+          43.81,
+          -111.78
         ]
       },
       "properties": {
-        "name": "Example Point"
+        "name": "Map View Test"
       }
     }
   ]

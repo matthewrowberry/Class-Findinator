@@ -18,15 +18,32 @@ var imageUrl = '/img/1st Floor.png',
 var image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 
 
+fetch("files.json")
+    .then(response => response.json()) // Parse response as JSON
+    .then(data => {
+        const existingItem = data.find(item => item.image === imageUrl);
+        imageBounds[0][0] = existingItem.x1;
+        imageBounds[1][0] = existingItem.x2;
+        imageBounds[0][1] = existingItem.y1;
+        imageBounds[1][1] = existingItem.y2;
+        map.removeLayer(image);
+        image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+    }).catch(error => console.error('Error:', error));
+
+
+
+
 document.getElementById('imageUpload').addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
             map.removeLayer(image); // Remove the previous image overlay if it exists
-            const imageUrl = e.target.result;
+            imageUrl = file.name;
 
-            image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+            const imageDataURL = e.target.result;
+
+            image = L.imageOverlay(imageDataUrl, imageBounds, { opacity: 0.5 }).addTo(map);
         };
         reader.readAsDataURL(file);
     }
@@ -47,13 +64,13 @@ document.getElementById('down').addEventListener('click', function () {
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-document.getElementById('left').addEventListener('click', function () {
+document.getElementById('right').addEventListener('click', function () {
     imageBounds[0][1] += 0.000001;
     imageBounds[1][1] += 0.000001;
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-document.getElementById('right').addEventListener('click', function () {
+document.getElementById('left').addEventListener('click', function () {
     imageBounds[0][1] -= 0.000001;
     imageBounds[1][1] -= 0.000001;
     map.removeLayer(image);
@@ -75,42 +92,66 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-document.getElementById('RicksButton').addEventListener('click', function () {
-    map.whenReady(() => {
-        AddMarker(43.814859537991715, -111.78104934795863, "Ricks Building");
-    });
+
+document.getElementById('tallenup').addEventListener('click', function () {
+    imageBounds[0][0] += 0.000001;
+    imageBounds[1][0] -= 0.000001;
+    
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-document.getElementById('ManwaringCenterButton').addEventListener('click', function () {
-    map.whenReady(() => {
-        AddMarker(43.81843055825238, -111.78261029361335, "Manwaring Center");
-    });
+document.getElementById('tallendown').addEventListener('click', function () {
+    imageBounds[0][0] -= 0.000001;
+    imageBounds[1][0] += 0.000001;
+    
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+document.getElementById('widendown').addEventListener('click', function () {
+    
+    imageBounds[0][1] += 0.000001;
+    imageBounds[1][1] -= 0.000001;
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+});
+document.getElementById('widenup').addEventListener('click', function () {
+    
+    imageBounds[0][1] -= 0.000001;
+    imageBounds[1][1] += 0.000001;
+    map.removeLayer(image);
+    image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
 
+
+document.getElementById('SaveMapButton').addEventListener('click', function () {
+    const geoJsonStr = JSON.stringify(geoJson, null, 2)
+
+    const blob = new Blob([geoJsonStr], { type: "application/json" })
+
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = "data.geojson"
+    link.click()
+
+})
+
+
 //GeoJson Collecting Information
-const geoJson ={
+const geoJson = {
     type: "FeatureCollection",
     features: [
         {
             type: "Feature",
             geometry: {
                 type: "Point",
-                coordinates: [102.0, 0.5]
+                coordinates: [-111.78, 43.81]
             },
-            properties:{
-                name: "Map View Test",
+            properties: {
+                name: "Saved Map Location"
             },
         },
     ],
-}
-
-const geoJsonStr = JSON.stringify(geoJson, null, 2)
-
-const blob = new Blob([geoJsonStr], { type: "application/json" })
-
-const link = document.createElement("a")
-link.href = URL.createObjectURL(blob)
-link.download = "data.geojson"
-link.click()
+};
 
 L.geoJSON(geoJson, {
     onEachFeature: function (feature, layer) {
@@ -119,6 +160,7 @@ L.geoJSON(geoJson, {
         }
     }
 }).addTo(map)
+
 
 //URL.revokeObjectURL(link.href)
 
@@ -130,18 +172,61 @@ L.geoJSON(geoJson, {
 
 
 
+document.getElementById('Player1').addEventListener('click', function () {
+    map.whenReady(() => {
+        if (FlagMarker != null) {
+            map.removeLayer(FlagMarker);
+            FlagMarker = null;
+        }
+        else
+            FlagMarker = AddMarker([43.81502764600424, -111.78348485552259], "STC Building");
+    });
+});
+
+document.getElementById('Player2').addEventListener('click', function () {
+    map.whenReady(() => {
+        if (FlagMarker != null) {
+            map.removeLayer(FlagMarker);
+            FlagMarker = null;
+        }
+        else
+            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
+    });
+});
+
+document.getElementById('Player3').addEventListener('click', function () {
+    map.whenReady(() => {
+        if (FlagMarker != null) {
+            map.removeLayer(FlagMarker);
+            FlagMarker = null;
+        }
+        else
+            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
+    });
+});
+
+document.getElementById('Player4').addEventListener('click', function () {
+    map.whenReady(() => {
+        if (FlagMarker != null) {
+            map.removeLayer(FlagMarker);
+            FlagMarker = null;
+        }
+        else
+            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
+    });
+});
 
 const FlagIcon = L.icon({
-  iconUrl: 'Flag.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -35]
+    iconUrl: '/img/Flag.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -35]
 });
 
 FlagMarker = null;
-document.getElementById('STCButton').addEventListener('click', function () {
+document.getElementById('Flag').addEventListener('click', function () {
     map.whenReady(() => {
-        if (FlagMarker != null){
+        if (FlagMarker != null) {
             map.removeLayer(FlagMarker);
             FlagMarker = null;
         }
@@ -151,11 +236,11 @@ document.getElementById('STCButton').addEventListener('click', function () {
 });
 
 function AddMarker(lat, lng, markername) {
-    L.marker([lat, lng], {icon: L.icon({iconUrl: 'Flag.png',iconSize: [40, 40],iconAnchor: [20, 40],})}).addTo(map).bindPopup(markername).openPopup();
+    L.marker([lat, lng], { icon: L.icon({ iconUrl: '/img/Flag.png', iconSize: [40, 40], iconAnchor: [20, 40], }) }).addTo(map).bindPopup(markername).openPopup();
     map.flyTo([lat, lng], 19, {
-            animate: true,
-            duration: 1.5
-        });
+        animate: true,
+        duration: 1.5
+    });
 }
 
 
@@ -175,26 +260,35 @@ document.getElementById('save').addEventListener('click', function () {
 
 function overlaySave() {
     //generate json
-    
+
 
     fetch("files.json")
         .then(response => response.json()) // Parse response as JSON
         .then(data => {
-            const newRow = {image: imageUrl, x1: imageBounds[0][0], y1: imageBounds[0][1], x2:  imageBounds[1][0], y2: imageBounds[1][1]};
+            const newRow = { image: imageUrl, x1: imageBounds[0][0], y1: imageBounds[0][1], x2: imageBounds[1][0], y2: imageBounds[1][1] };
 
             const existingItem = data.find(item => item.image === newRow.image);
 
 
-            if(existingItem){
+            if (existingItem) {
                 existingItem.x1 = newRow.x1;
                 existingItem.x2 = newRow.x2;
                 existingItem.y1 = newRow.y1;
-                existingItem.y2 = newRow.xy2;
-            }else{
+                existingItem.y2 = newRow.y2;
+            } else {
                 data.push(newRow);
             }
-            
-            
+
+
+            const save = JSON.stringify(data, null, 2)
+
+            const blob = new Blob([save], { type: "application/json" })
+
+            const link = document.createElement("a")
+            link.href = URL.createObjectURL(blob)
+            link.download = "files.json"
+            link.click()
+
 
         })  // Handle the data
         .catch(error => console.error('Error:', error));
@@ -209,12 +303,12 @@ function overlaySave() {
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
-    console.log(lat,lng);
+    console.log(lat, lng);
 });
-        
 
-    
-    
+
+
+
 
 
 
