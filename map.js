@@ -75,11 +75,6 @@ document.getElementById('zoomOut').addEventListener('click', function () {
     map.removeLayer(image);
     image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
 });
-document.getElementById('STCButton').addEventListener('click', function () {
-    map.whenReady(() => {
-        AddMarker(43.814672, -111.784795, "STC Building");
-    });
-});
 document.getElementById('RicksButton').addEventListener('click', function () {
     map.whenReady(() => {
         AddMarker(43.814859537991715, -111.78104934795863, "Ricks Building");
@@ -91,7 +86,7 @@ document.getElementById('ManwaringCenterButton').addEventListener('click', funct
     });
 });
 
-
+//GeoJson Collecting Information
 const geoJson ={
     type: "FeatureCollection",
     features: [
@@ -102,7 +97,7 @@ const geoJson ={
                 coordinates: [102.0, 0.5]
             },
             properties:{
-                name: "Example Point",
+                name: "Map View Test",
             },
         },
     ],
@@ -117,17 +112,60 @@ link.href = URL.createObjectURL(blob)
 link.download = "data.geojson"
 link.click()
 
-URL.revokeObjectURL(link.href)
+L.geoJSON(geoJson, {
+    onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.name) {
+            layer.bindPopup(feature.properties.name)
+        }
+    }
+}).addTo(map)
+
+//URL.revokeObjectURL(link.href)
+
+
+
+
+
+
+
+
+
+
+const FlagIcon = L.icon({
+  iconUrl: 'Flag.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -35]
+});
+
+FlagMarker = null;
+document.getElementById('STCButton').addEventListener('click', function () {
+    map.whenReady(() => {
+        if (FlagMarker != null){
+            map.removeLayer(FlagMarker);
+            FlagMarker = null;
+        }
+        else
+            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
+    });
+});
 
 function AddMarker(lat, lng, markername) {
-    L.marker([lat, lng]).addTo(map)
-    .bindPopup(markername)
-    .openPopup();
+    L.marker([lat, lng], {icon: L.icon({iconUrl: 'Flag.png',iconSize: [40, 40],iconAnchor: [20, 40],})}).addTo(map).bindPopup(markername).openPopup();
     map.flyTo([lat, lng], 19, {
             animate: true,
             duration: 1.5
         });
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -137,10 +175,57 @@ document.getElementById('save').addEventListener('click', function () {
 
 function overlaySave() {
     //generate json
-
+    
 
     fetch("files.json")
         .then(response => response.json()) // Parse response as JSON
-        .then(data => console.log(data))  // Handle the data
+        .then(data => {
+            const newRow = {image: imageUrl, x1: imageBounds[0][0], y1: imageBounds[0][1], x2:  imageBounds[1][0], y2: imageBounds[1][1]};
+
+            const existingItem = data.find(item => item.image === newRow.image);
+
+
+            if(existingItem){
+                existingItem.x1 = newRow.x1;
+                existingItem.x2 = newRow.x2;
+                existingItem.y1 = newRow.y1;
+                existingItem.y2 = newRow.xy2;
+            }else{
+                data.push(newRow);
+            }
+            
+            
+
+        })  // Handle the data
         .catch(error => console.error('Error:', error));
 }
+
+
+
+
+
+// austin = null;
+//document.getElementById('AustinButton').addEventListener('click',function())
+map.on('click', function (e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+    console.log(lat,lng);
+});
+        
+
+    
+    
+
+
+
+// STCMarker = null;
+// document.getElementById('STCButton').addEventListener('click', function () {
+//     map.whenReady(() => {
+//         if (STCMarker != null){
+//             map.removeLayer(STCMarker);
+//             STCMarker = null;
+//         }
+//         else
+//             STCMarker = L.marker([43.814672, -111.784795], "STC Building").addTo(map);
+//     });
+// });
