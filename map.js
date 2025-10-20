@@ -300,12 +300,56 @@ function overlaySave() {
 
 // austin = null;
 //document.getElementById('AustinButton').addEventListener('click',function())
+
+
+// austin = null;
+//document.getElementById('AustinButton').addEventListener('click',function())
+const lattatude = [];
+const longatude = [];
+let count = 0;
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
     console.log(lat, lng);
+    // const lat1 = e.latlng.lat;
+    // const lng2 = e.latlng.lng;
+    // console.log(lat1, lng2);
+    lattatude.push(lat);
+    longatude.push(lng);
+    count++;
+    console.log(lattatude)
+    console.log(count)
+    if (count >= 2){
+
+let one = lattatude[0];
+let red = lattatude[1];
+let two = longatude[0];
+let blue = longatude[1];
+draw(one, two, red, blue);
+    // console.log(lattatude)
+    // console.log(longatude)
+    lattatude.pop();
+    longatude.pop();
+    lattatude.pop();
+    longatude.pop();
+    count = 0;
+     };
+     
+   
+    
+
 });
 
+
+function draw(one,two,red,blue)
+{
+    const line = L.polyline([
+        [one,two],
+        [red,blue]
+    ], { color: 'blue' }).addTo(map);
+    
+
+    }
 
 
 
