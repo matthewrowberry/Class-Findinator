@@ -143,11 +143,15 @@ const geoJson = {
         {
             type: "Feature",
             geometry: {
-                type: "Point",
-                coordinates: [-111.78, 43.81]
+                type: "LineString",
+                coordinates: [
+                    [-111.78, 43.81],
+                    [1,1]
+                ]
             },
             properties: {
-                name: "Saved Map Location"
+                name: "Saved Line Map Points",
+                description: "STC Room line locations"
             },
         },
     ],
@@ -164,9 +168,28 @@ L.geoJSON(geoJson, {
 
 //URL.revokeObjectURL(link.href)
 
+function addFeature(type, points) {
+    feature = "";
 
+    if(type=="wall"){
+        feature = {
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: points
+            },
+            properties: {
+                name: "Wall",
+                description: "STC Room line locations"
+            },
+        };
+    }
 
+    geoJson.features.push(feature)
+}
 
+addFeature("wall", [[43.814852, -111.785487], [43.814288, -111.784096]])
+console.log(geoJson)
 
 
 
@@ -304,55 +327,76 @@ function overlaySave() {
 
 // austin = null;
 //document.getElementById('AustinButton').addEventListener('click',function())
-const lattatude = [];
-const longatude = [];
+let drawMode = true; // start in draw mode
+const latitude = [];
+const longitude = [];
 let count = 0;
+const lines = [];
+
+const drawButton = document.getElementById('drawButton');
+const eraseButton = document.getElementById('eraseButton');
+
+drawButton.addEventListener('click', () => {
+    drawMode = true;
+    drawButton.style.background = 'lightblue';
+    eraseButton.style.background = '';
+});
+
+eraseButton.addEventListener('click', () => {
+    drawMode = false;
+    eraseButton.style.background = 'lightcoral';
+    drawButton.style.background = '';
+});
+
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
-    console.log(lat, lng);
-    // const lat1 = e.latlng.lat;
-    // const lng2 = e.latlng.lng;
-    // console.log(lat1, lng2);
-    lattatude.push(lat);
-    longatude.push(lng);
-    count++;
-    console.log(lattatude)
-    console.log(count)
-    if (count >= 2){
 
-let one = lattatude[0];
-let red = lattatude[1];
-let two = longatude[0];
-let blue = longatude[1];
-draw(one, two, red, blue);
-    // console.log(lattatude)
-    // console.log(longatude)
-    lattatude.pop();
-    longatude.pop();
-    lattatude.pop();
-    longatude.pop();
-    count = 0;
-     };
-     
-   
-    
+    if (drawMode) {
+        latitude.push(lat);
+        longitude.push(lng);
+        count++;
 
+        if (count >= 2) {
+            const one = latitude[0];
+            const two = longitude[0];
+            const red = latitude[1];
+            const blue = longitude[1];
+
+            drawLine(one, two, red, blue);
+
+            latitude.length = 0;
+            longitude.length = 0;
+            count = 0;
+        }
+    } else {
+        // Erase mode: check if user clicked on a line
+        lines.forEach((line, index) => {
+            if (map.hasLayer(line)) {
+                // use Leaflet’s built-in distance check
+                const latlng = e.latlng;
+                const closest = L.GeometryUtil.closest(map, line, latlng);
+                const distance = latlng.distanceTo(closest);
+                if (distance < 10) { // 10 meters tolerance
+                    map.removeLayer(line);
+                    lines.splice(index, 1);
+                }
+            }
+        });
+    }
 });
 
+function drawLine(one, two, red, blue) {
+    const line = L.polyline(
+        [
+            [one, two],
+            [red, blue]
+        ],
+        { color: 'blue' }
+    ).addTo(map);
 
-function draw(one,two,red,blue)
-{
-    const line = L.polyline([
-        [one,two],
-        [red,blue]
-    ], { color: 'blue' }).addTo(map);
-    
-
-    }
-
-
-
+    lines.push(line);
+}
 
 
 
@@ -367,3 +411,5 @@ function draw(one,two,red,blue)
 //             STCMarker = L.marker([43.814672, -111.784795], "STC Building").addTo(map);
 //     });
 // });
+
+
