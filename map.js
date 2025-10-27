@@ -13,6 +13,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 //     .openPopup();
 
 
+map.on('click', function (e) {
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+    console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+});
+
+
 var imageUrl = '/img/1st Floor.png',
     imageBounds = [[43.814852, -111.785487], [43.814288, -111.784096]];
 var image = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.5 }).addTo(map);
@@ -153,17 +160,11 @@ const geoJson = {
                 name: "Saved Line Map Points",
                 description: "STC Room line locations"
             },
-        },
+        }
     ],
 };
 
-L.geoJSON(geoJson, {
-    onEachFeature: function (feature, layer) {
-        if (feature.properties && feature.properties.name) {
-            layer.bindPopup(feature.properties.name)
-        }
-    }
-}).addTo(map)
+
 
 
 //URL.revokeObjectURL(link.href)
@@ -184,13 +185,66 @@ function addFeature(type, points) {
             },
         };
     }
+    else if(type=="walk"){
+        feature = {
+            type: "Feature",
+            geometry: {
+                type: "Polygon",
+                coordinates: points
+            },
+            properties: {
+                name: "walkable-area",
+                description: "You can walk here"
+            },
+        };
+    }
+    else if(type="noWalk"){
+        feature = {
+            type: "Feature",
+            geometry: {
+                type: "Polygon",
+                coordinates: points
+            },
+            properties: {
+                name: "non-walkable-area",
+                description: "You can't walk here"
+            },
+        };
+    }
 
     geoJson.features.push(feature)
 }
 
-addFeature("wall", [[43.814852, -111.785487], [43.814288, -111.784096]])
-console.log(geoJson)
+addFeature("wall",  [[-111.78494215902532,43.81452215796811],
+                    [-111.78489318278858, 43.814521916037975],
+                    [-111.78489350650473, 43.81447885245585],
+                    [-111.78494240732802, 43.81447874157049],
+                    [-111.78494278055466, 43.814507158297026]]);
 
+addFeature("walk", [[[-111.78497704530064, 43.81452143217765],
+                    [-111.7849336990262, 43.814664059911415],
+                    [-111.78470813717772, 43.81450755143178],
+                    [-111.78491079878144, 43.814440778657136],
+                    [-111.78505163393007, 43.814432069159295],
+                    [-111.78497704530064, 43.81452143217765]]]);
+
+addFeature("noWalk", [[[-111.7849304520281, 43.814523125688694],
+                    [-111.7849324424039, 43.81454067570142],
+                    [-111.78491633209768, 43.814539707981126],
+                    [-111.78491984543295, 43.81454938518341],
+                    [-111.78477960125181, 43.81454938518341],
+                    [-111.78477814646658, 43.81447970929178],
+                    [-111.78489186116929, 43.81447885245585],
+                    [-111.78489286632133, 43.81452083743209]]]);
+
+
+L.geoJSON(geoJson, {
+    onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.name) {
+            layer.bindPopup(feature.properties.name)
+        }
+    }
+}).addTo(map)
 
 
 
@@ -348,11 +402,25 @@ eraseButton.addEventListener('click', () => {
     drawButton.style.background = '';
 });
 
+// --- helper: compute pixel distance from a point to a line segment ---
+function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    if (dx === 0 && dy === 0) return Math.hypot(px - x1, py - y1);
+    const t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+    if (t < 0) return Math.hypot(px - x1, py - y1);
+    if (t > 1) return Math.hypot(px - x2, py - y2);
+    const projx = x1 + t * dx;
+    const projy = y1 + t * dy;
+    return Math.hypot(px - projx, py - projy);
+}
+
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
 
     if (drawMode) {
+        // --- DRAW MODE ---
         latitude.push(lat);
         longitude.push(lng);
         count++;
@@ -362,27 +430,44 @@ map.on('click', function (e) {
             const two = longitude[0];
             const red = latitude[1];
             const blue = longitude[1];
-
             drawLine(one, two, red, blue);
 
             latitude.length = 0;
             longitude.length = 0;
             count = 0;
         }
+
     } else {
-        // Erase mode: check if user clicked on a line
-        lines.forEach((line, index) => {
-            if (map.hasLayer(line)) {
-                // use Leaflet’s built-in distance check
-                const latlng = e.latlng;
-                const closest = L.GeometryUtil.closest(map, line, latlng);
-                const distance = latlng.distanceTo(closest);
-                if (distance < 10) { // 10 meters tolerance
-                    map.removeLayer(line);
-                    lines.splice(index, 1);
-                }
+        // --- ERASE MODE ---
+        const clickPoint = map.latLngToLayerPoint(e.latlng);
+        const tolerancePx = 10; // how close (in pixels) you must click to delete a line
+
+        // iterate backward so we can safely remove from array
+        for (let i = lines.length - 1; i >= 0; i--) {
+            const line = lines[i];
+            if (!map.hasLayer(line)) continue;
+
+            const latlngs = line.getLatLngs().flat(Infinity);
+            let minDistPx = Infinity;
+
+            // check each segment of the polyline
+            for (let j = 0; j < latlngs.length - 1; j++) {
+                const p1 = map.latLngToLayerPoint(latlngs[j]);
+                const p2 = map.latLngToLayerPoint(latlngs[j + 1]);
+                const d = pointToSegmentDistance(
+                    clickPoint.x, clickPoint.y,
+                    p1.x, p1.y,
+                    p2.x, p2.y
+                );
+                if (d < minDistPx) minDistPx = d;
             }
-        });
+
+            if (minDistPx <= tolerancePx) {
+                map.removeLayer(line);
+                lines.splice(i, 1);
+                break; // remove one line per click
+            }
+        }
     }
 });
 
@@ -397,7 +482,6 @@ function drawLine(one, two, red, blue) {
 
     lines.push(line);
 }
-
 
 
 // STCMarker = null;
