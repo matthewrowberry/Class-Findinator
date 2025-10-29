@@ -5,14 +5,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-//tools controls
 
-
-// L.marker([43.814672, -111.784795]).addTo(map)
-//     .bindPopup('The Science and Technology Center<br> What is your class?')
-//     .openPopup();
-
-
+// When user clicks on the map, it shows the lat and lon of where they clicked.
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
@@ -55,10 +49,9 @@ document.getElementById('imageUpload').addEventListener('change', function (even
         reader.readAsDataURL(file);
     }
 });
-//43°48'51.3"N 111°47'02.5"W
 
-//let's make these sliderss in the future
-//move the image overlay as desired
+//-----------------------------------------------------------------------------
+//Picture Slider adjuster.
 document.getElementById('up').addEventListener('click', function () {
     imageBounds[0][0] += 0.000001;
     imageBounds[1][0] += 0.000001;
@@ -130,6 +123,10 @@ document.getElementById('widenup').addEventListener('click', function () {
 });
 
 
+//-----------------------------------------------------------------------------
+
+
+// Button to save the geoJson information into a geoJson file.
 document.getElementById('SaveMapButton').addEventListener('click', function () {
     const geoJsonStr = JSON.stringify(geoJson, null, 2)
 
@@ -164,11 +161,7 @@ const geoJson = {
     ],
 };
 
-
-
-
-//URL.revokeObjectURL(link.href)
-
+// Add different types of geoJson into map save.
 function addFeature(type, points) {
     feature = "";
 
@@ -215,19 +208,22 @@ function addFeature(type, points) {
     geoJson.features.push(feature)
 }
 
+// Test Wall Area
 addFeature("wall",  [[-111.78494215902532,43.81452215796811],
                     [-111.78489318278858, 43.814521916037975],
                     [-111.78489350650473, 43.81447885245585],
                     [-111.78494240732802, 43.81447874157049],
                     [-111.78494278055466, 43.814507158297026]]);
 
+// Test Walk Area
 addFeature("walk", [[[-111.78497704530064, 43.81452143217765],
                     [-111.7849336990262, 43.814664059911415],
                     [-111.78470813717772, 43.81450755143178],
                     [-111.78491079878144, 43.814440778657136],
                     [-111.78505163393007, 43.814432069159295],
                     [-111.78497704530064, 43.81452143217765]]]);
-
+                    
+// Test No Walk Area
 addFeature("noWalk", [[[-111.7849304520281, 43.814523125688694],
                     [-111.7849324424039, 43.81454067570142],
                     [-111.78491633209768, 43.814539707981126],
@@ -237,6 +233,40 @@ addFeature("noWalk", [[[-111.7849304520281, 43.814523125688694],
                     [-111.78489186116929, 43.81447885245585],
                     [-111.78489286632133, 43.81452083743209]]]);
 
+//-----------------------------------------------------------------------------                    
+
+//1st Floor Walkable Area
+//addFeature("walk", [[[]]])
+
+//1st Floor Non-Walkable Area
+//addFeature("noWalk", [[[]]])
+
+//1st Floor Walls
+//addFeature("wall", [[]])
+
+//-----------------------------------------------------------------------------
+
+//2nd Floor Walkable Area
+//addFeature("walk", [[[]]])
+
+//2nd Floor Non-Walkable Area
+//addFeature("noWalk", [[[]]])
+
+//2nd Floor Walls
+//addFeature("wall", [[]])
+
+//-----------------------------------------------------------------------------
+
+//3rd Floor Walkable Area
+//addFeature("walk", [[[]]])
+
+//3rd Floor Non-Walkable Area
+//addFeature("noWalk", [[[]]])
+
+//3rd Floor Walls
+//addFeature("wall", [[]])
+
+//-----------------------------------------------------------------------------
 
 L.geoJSON(geoJson, {
     onEachFeature: function (feature, layer) {
@@ -249,95 +279,12 @@ L.geoJSON(geoJson, {
 
 
 
-document.getElementById('Player1').addEventListener('click', function () {
-    map.whenReady(() => {
-        if (FlagMarker != null) {
-            map.removeLayer(FlagMarker);
-            FlagMarker = null;
-        }
-        else
-            FlagMarker = AddMarker([43.81502764600424, -111.78348485552259], "STC Building");
-    });
-});
-
-document.getElementById('Player2').addEventListener('click', function () {
-    map.whenReady(() => {
-        if (FlagMarker != null) {
-            map.removeLayer(FlagMarker);
-            FlagMarker = null;
-        }
-        else
-            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
-    });
-});
-
-document.getElementById('Player3').addEventListener('click', function () {
-    map.whenReady(() => {
-        if (FlagMarker != null) {
-            map.removeLayer(FlagMarker);
-            FlagMarker = null;
-        }
-        else
-            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
-    });
-});
-
-document.getElementById('Player4').addEventListener('click', function () {
-    map.whenReady(() => {
-        if (FlagMarker != null) {
-            map.removeLayer(FlagMarker);
-            FlagMarker = null;
-        }
-        else
-            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
-    });
-});
-
-const FlagIcon = L.icon({
-    iconUrl: '/img/Flag.png',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -35]
-});
-
-FlagMarker = null;
-document.getElementById('Flag').addEventListener('click', function () {
-    map.whenReady(() => {
-        if (FlagMarker != null) {
-            map.removeLayer(FlagMarker);
-            FlagMarker = null;
-        }
-        else
-            FlagMarker = AddMarker([43.814672, -111.784795], "STC Building");
-    });
-});
-
-function AddMarker(lat, lng, markername) {
-    L.marker([lat, lng], { icon: L.icon({ iconUrl: '/img/Flag.png', iconSize: [40, 40], iconAnchor: [20, 40], }) }).addTo(map).bindPopup(markername).openPopup();
-    map.flyTo([lat, lng], 19, {
-        animate: true,
-        duration: 1.5
-    });
-}
-
-
-
-
-
-
-
-
-
-
-
-
 document.getElementById('save').addEventListener('click', function () {
     overlaySave();
 });
 
 function overlaySave() {
     //generate json
-
 
     fetch("files.json")
         .then(response => response.json()) // Parse response as JSON
@@ -371,17 +318,9 @@ function overlaySave() {
         .catch(error => console.error('Error:', error));
 }
 
-
-
-
-
-// austin = null;
-//document.getElementById('AustinButton').addEventListener('click',function())
-
-
-// austin = null;
-//document.getElementById('AustinButton').addEventListener('click',function())
-let drawMode = true; // start in draw mode
+//-----------------------------------------------------------------------------
+// start in draw mode
+let drawMode = true; 
 const latitude = [];
 const longitude = [];
 let count = 0;
@@ -483,17 +422,5 @@ function drawLine(one, two, red, blue) {
     lines.push(line);
 }
 
-
-// STCMarker = null;
-// document.getElementById('STCButton').addEventListener('click', function () {
-//     map.whenReady(() => {
-//         if (STCMarker != null){
-//             map.removeLayer(STCMarker);
-//             STCMarker = null;
-//         }
-//         else
-//             STCMarker = L.marker([43.814672, -111.784795], "STC Building").addTo(map);
-//     });
-// });
 
 
