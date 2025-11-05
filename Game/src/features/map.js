@@ -1,6 +1,6 @@
-class MyGameScene extends Phaser.Scene {
+class Map extends Phaser.Scene {
   constructor() {
-    super({ key: 'map' });
+    super({ key: 'Map' });
   }
 
   create() {
