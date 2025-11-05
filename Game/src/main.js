@@ -5,12 +5,16 @@ const config = {
     title: 'Capture The Flaginator',
     description: 'A Capture the flag game in the STC',
     parent: 'game-container',
-    width: 2560,
-    height: 1440,
+    width: 1920,
+    height: 1080,
     backgroundColor: '#FFFFFF',
     pixelArt: false,
     scene: [
-        Start
+        Boot,
+        Game,
+        Preloader,
+        Start,
+
     ],
     scale: {
         mode: Phaser.Scale.FIT,
