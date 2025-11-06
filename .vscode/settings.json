@@ -3,7 +3,9 @@
         "latlng",
         "latlngs",
         "lightcoral",
+        "lons",
         "projx",
-        "projy"
+        "projy",
+        "testmap"
     ]
 }

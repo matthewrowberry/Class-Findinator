@@ -1,4 +1,5 @@
 import { Start } from './scenes/Start.js';
+import { Map } from './features/map.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -9,11 +10,18 @@ const config = {
     height: 1080,
     backgroundColor: '#FFFFFF',
     pixelArt: false,
+    physics: {
+        default: "arcade",
+        arcade: {
+            debug: true
+        }
+    },
     scene: [
-        Boot,
-        Game,
-        Preloader,
+        // Boot,
+        // Game,
+        // Preloader,
         Start,
+        Map,
 
     ],
     scale: {
