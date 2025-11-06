@@ -1,6 +1,6 @@
-export class Map extends Phaser.Scene {
+class Map extends Phaser.Scene {
   constructor() {
-    super({ key: 'map' });
+    super({ key: 'Map' });
   }
 
   preload() {

@@ -1,7 +1,8 @@
 
 import ASSETS from '../assets.js';
-import ASSETS from '../assets.js';
-import ASSETS from '../assets.js';
+import ANIMATION from '../assets.js';
+import Map from 'src\features\map.js';
+import Player from 'src\features\map.js';
 
 class Game extends Phaser.Scene {
   constructor() {
