@@ -1,3 +1,6 @@
+//import 
+//import { Player } from 'src\features\Player.js';
+
 export class Start extends Phaser.Scene {
     constructor() {
         super({key: 'start'});
@@ -9,14 +12,12 @@ export class Start extends Phaser.Scene {
         // this.load.image('background', 'assets/space.png');
         // this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
         this.load.json("testMap", "assets/testmap.geojson")
-        this.load.image("player", "assets/spaceship.png")
-        this.cameras.main.setBounds(0, 0, 1920, 1080)
+        this.load.image("player", "assets/testChar.png")
+
     }
 
     create() {
         this.background = this.add.tileSprite(1280, 720, 2560, 1440, 'background');
-        
-        const ship = this.add.sprite(1280, 720, 'ship');
 
         // world bounds
         this.physics.world.setBounds(0, 0, 2560, 1440);
@@ -25,40 +26,42 @@ export class Start extends Phaser.Scene {
         this.add.tileSprite(0, 0, 2560, 1440, 'background').setOrigin(0, 0);
 
         // player
-        this.player = this.physics.add.sprite(1280 / 2, 720 / 2, 'ship');
+        this.player = this.physics.add.sprite(1280 / 2, 720 / 2, 'testChar');
 
         // camera
         const cam = this.cameras.main;
         cam.setBounds(0, 0, 2560, 1440);
         cam.startFollow(this.player);
-        cam.setZoom(2);
+        cam.setZoom(0.4);
+        
+        
 
         // input
         this.keys = this.input.keyboard.addKeys({
-        up: Phaser.Input.Keyboard.KeyCodes.W,
-        down: Phaser.Input.Keyboard.KeyCodes.S,
-        left: Phaser.Input.Keyboard.KeyCodes.A,
-        right: Phaser.Input.Keyboard.KeyCodes.D
+            up: Phaser.Input.Keyboard.KeyCodes.W,
+            down: Phaser.Input.Keyboard.KeyCodes.S,
+            left: Phaser.Input.Keyboard.KeyCodes.A,
+            right: Phaser.Input.Keyboard.KeyCodes.D
         });
 
         this.scene.start('map');
     }
 
     update() {
+        this.player.update();
         const speed = 300;
-        this.ship.setVelocity(0);
+        this.player.setVelocity(0);
 
-        if (this.cursors.left.isDown) {
-            this.ship.setVelocityX(-speed);
-        } else if (this.cursors.right.isDown) {
-            this.ship.setVelocityX(speed);
+        if (this.keys.left.isDown) {
+            this.player.setVelocityX(-speed);
+        } else if (this.keys.right.isDown) {
+            this.player.setVelocityX(speed);
         }
 
-        if (this.cursors.up.isDown) {
-            this.ship.setVelocityY(-speed);
+        if (this.cursos.up.isDown) {
+            this.player.setVelocityY(-speed);
         } else if (this.cursors.down.isDown) {
-            this.ship.setVelocityY(speed);
+            this.player.setVelocityY(speed);
         }
     }
-    
 }

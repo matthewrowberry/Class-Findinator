@@ -1,48 +1,47 @@
-class Player extends Phaser.Scene {
-  constructor() {
-    super({ key: 'Player' });
-  }
+// player.js
+export default class Player extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y, texture) {
+        super(scene, x, y, texture);
 
-  preload() {
-    // Step 1: load assets (images, GeoJSON, etc.)
-    this.player = this.physics.add.sprite(400, 300, 'player');
-  }
+        // Add to scene + physics
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
 
-  create() {
-    // Step 2–4: build world, physics bodies, and player
-    // Set up keyboard input for WASD
-    this.keys = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D
-    });
+        // Enable collisions with world bounds
+        this.setCollideWorldBounds(true);
 
-    // Movement speed
-    this.speed = 200;
-  }
+        // Store movement speed
+        this.speed = 200;
 
-  update() {
-    // Step 5: handle movement and interactions
-    // Reset player velocity every frame
-    this.player.setVelocity(0);
-    // Horizontal movement
-    if (this.keys.left.isDown) {
-      this.player.setVelocityX(-this.speed);
-    } else if (this.keys.right.isDown) {
-      this.player.setVelocityX(this.speed);
+        // Set up WASD keys
+        this.keys = scene.input.keyboard.addKeys({
+            up: Phaser.Input.Keyboard.KeyCodes.W,
+            down: Phaser.Input.Keyboard.KeyCodes.S,
+            left: Phaser.Input.Keyboard.KeyCodes.A,
+            right: Phaser.Input.Keyboard.KeyCodes.D
+        });
     }
 
-    // Vertical movement
-    if (this.keys.up.isDown) {
-      this.player.setVelocityY(-this.speed);
-    } else if (this.keys.down.isDown) {
-      this.player.setVelocityY(this.speed);
-    }
+    update() {
+        // Reset velocity each frame
+        this.setVelocity(0);
 
-    // Optional: normalize diagonal movement
-    if (this.player.body.velocity.length() > this.speed) {
-      this.player.body.velocity.normalize().scale(this.speed);
+        // Movement
+        if (this.keys.left.isDown) {
+            this.setVelocityX(-this.speed);
+        } else if (this.keys.right.isDown) {
+            this.setVelocityX(this.speed);
+        }
+
+        if (this.keys.up.isDown) {
+            this.setVelocityY(-this.speed);
+        } else if (this.keys.down.isDown) {
+            this.setVelocityY(this.speed);
+        }
+
+        // Optional: normalize diagonal movement
+        if (this.body.velocity.length() > this.speed) {
+            this.body.velocity.normalize().scale(this.speed);
+        }
     }
-  }
 }
