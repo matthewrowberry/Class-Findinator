@@ -1,3 +1,5 @@
+//import { Player } from './features/Player.js';
+
 export class Map extends Phaser.Scene {
   constructor() {
     super({ key: 'map' });
@@ -5,6 +7,7 @@ export class Map extends Phaser.Scene {
 
   preload() {
     this.load.json('testMap', 'assets/testMap.geojson');
+    this.load.image("player", "assets/testChar2.png")
   }
 
   create() {
@@ -96,7 +99,7 @@ export class Map extends Phaser.Scene {
 
 
 
-    this.player = this.add.sprite(400, 300, 'player');
+    this.player = this.add.sprite(400, 300, 'testChar2');
     this.cameras.main.startFollow(this.player);
     console.log("GeoJSON loaded: ",testMap)
 
@@ -121,7 +124,7 @@ export class Map extends Phaser.Scene {
   
   update() {
     // Step 5: handle movement and interactions
-    
+    this.player.update();
   }
 }
 

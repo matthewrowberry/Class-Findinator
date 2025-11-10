@@ -1,6 +1,7 @@
 import { Start } from './scenes/Start.js';
 import { Map } from './features/map.js';
 
+
 const config = {
     type: Phaser.AUTO,
     title: 'Capture The Flaginator',
@@ -13,7 +14,8 @@ const config = {
     physics: {
         default: "arcade",
         arcade: {
-            debug: true
+            debug: true,
+        
         }
     },
     scene: [

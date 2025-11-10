@@ -1,5 +1,5 @@
-//import 
-//import { Player } from 'src\features\Player.js';
+
+//import Player from '../features/Player.js';
 
 export class Start extends Phaser.Scene {
     constructor() {
@@ -8,11 +8,9 @@ export class Start extends Phaser.Scene {
 
     preload() {
         console.log("Start pre-loading")
-        // The ship sprite is CC0 from https://ansimuz.itch.io - check out his other work!
-        // this.load.image('background', 'assets/space.png');
-        // this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
+
         this.load.json("testMap", "assets/testmap.geojson")
-        this.load.image("player", "assets/testChar.png")
+        this.load.image("player", "assets/testChar2.png")
 
     }
 
@@ -20,13 +18,13 @@ export class Start extends Phaser.Scene {
         this.background = this.add.tileSprite(1280, 720, 2560, 1440, 'background');
 
         // world bounds
-        this.physics.world.setBounds(0, 0, 2560, 1440);
+        this.physics.world.setBounds(0, 0, 4560, 2440);
 
         // background
         this.add.tileSprite(0, 0, 2560, 1440, 'background').setOrigin(0, 0);
 
         // player
-        this.player = this.physics.add.sprite(1280 / 2, 720 / 2, 'testChar');
+        this.player = this.physics.add.sprite(1280 / 2, 720 / 2, 'testChar2');
 
         // camera
         const cam = this.cameras.main;
@@ -48,7 +46,7 @@ export class Start extends Phaser.Scene {
     }
 
     update() {
-        this.player.update();
+        console.log("update")
         const speed = 300;
         this.player.setVelocity(0);
 
@@ -58,9 +56,9 @@ export class Start extends Phaser.Scene {
             this.player.setVelocityX(speed);
         }
 
-        if (this.cursos.up.isDown) {
+        if (this.keys.up.isDown) {
             this.player.setVelocityY(-speed);
-        } else if (this.cursors.down.isDown) {
+        } else if (this.keys.down.isDown) {
             this.player.setVelocityY(speed);
         }
     }
