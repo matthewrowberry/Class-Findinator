@@ -8,29 +8,29 @@ export class Map extends Phaser.Scene {
   }
 
   create() {
-      // Step 2–4: build world, physics bodies, and player
-      const testMap = this.cache.json.get('testMap');
-      console.log("Loaded map:", testMap);
+    
+    const testMap = this.cache.json.get('testMap');
+    console.log("Loaded map:", testMap);
 
-      const canvasWidth = this.sys.game.config.width;
-      const canvasHeight = this.sys.game.config.height;
+    const canvasWidth = this.sys.game.config.width;
+    const canvasHeight = this.sys.game.config.height;
 
-      const lons = [], lats = [];
-      testMap.features.forEach(f => {
-        const coordsArray = (f.geometry.type === "Polygon")
-          ? f.geometry.coordinates.flat()
-          : f.geometry.coordinates;
-        coordsArray.forEach(([lon, lat]) => {
-          lons.push(lon);
-          lats.push(lat);
-        })
+    const lons = [], lats = [];
+    testMap.features.forEach(f => {
+      const coordsArray = (f.geometry.type === "Polygon")
+        ? f.geometry.coordinates.flat()
+        : f.geometry.coordinates;
+      coordsArray.forEach(([lon, lat]) => {
+        lons.push(lon);
+        lats.push(lat);
       })
-      const bounds = {
-        minLon: Math.min(...lons),
-        maxLon: Math.max(...lons),
-        minLat: Math.min(...lats),
-        maxLat: Math.max(...lats)
-      }
+    })
+    const bounds = {
+      minLon: Math.min(...lons),
+      maxLon: Math.max(...lons),
+      minLat: Math.min(...lats),
+      maxLat: Math.max(...lats)
+    }
 
     const graphics = this.add.graphics();
     graphics.lineStyle(2, 0x00FFFF, 1);
@@ -38,26 +38,26 @@ export class Map extends Phaser.Scene {
 
     testMap.features.forEach(f => {
     if (f.geometry.type === "Polygon") {
-        f.geometry.coordinates.forEach(polygon => {
-            const coords = polygon.map(c => this.convertCoords(c, bounds, canvasWidth, canvasHeight)); // adjust scale
-            graphics.beginPath();
-            graphics.moveTo(coords[0].x, coords[0].y);
-            for (let i = 1; i < coords.length; i++) {
-                graphics.lineTo(coords[i].x, coords[i].y);
-            }
-            graphics.closePath();
-            graphics.strokePath();
-        });
+      f.geometry.coordinates.forEach(polygon => {
+        const coords = polygon.map(c => this.convertCoords(c, bounds, canvasWidth, canvasHeight)); // adjust scale
+        graphics.beginPath();
+        graphics.moveTo(coords[0].x, coords[0].y);
+        for (let i = 1; i < coords.length; i++) {
+          graphics.lineTo(coords[i].x, coords[i].y);
+        }
+        graphics.closePath();
+        graphics.strokePath();
+      });
       
-      } else if (f.geometry.type === "LineString") {
-          const coords = f.geometry.coordinates.map(c => this.convertCoords(c, bounds, canvasWidth, canvasHeight));
-          graphics.beginPath();
-          graphics.moveTo(coords[0].x, coords[0].y);
-          for (let i = 1; i < coords.length; i++) {
-            graphics.lineTo(coords[i].x, coords[i].y);
-          }
-          graphics.strokePath();
+    } else if (f.geometry.type === "LineString") {
+      const coords = f.geometry.coordinates.map(c => this.convertCoords(c, bounds, canvasWidth, canvasHeight));
+      graphics.beginPath();
+      graphics.moveTo(coords[0].x, coords[0].y);
+      for (let i = 1; i < coords.length; i++) {
+        graphics.lineTo(coords[i].x, coords[i].y);
       }
+      graphics.strokePath();
+    }
     });
 
 
@@ -68,25 +68,24 @@ export class Map extends Phaser.Scene {
 
   }
 
-    convertCoords([lon, lat], bounds, canvasWidth, canvasHeight) {
-      const { minLon, maxLon, minLat, maxLat } = bounds;
+  convertCoords([lon, lat], bounds, canvasWidth, canvasHeight) {
+    const { minLon, maxLon, minLat, maxLat } = bounds;
     
+    const lonRange = maxLon - minLon;
+    const latRange = maxLat - minLat;
 
-      const lonRange = maxLon - minLon;
-      const latRange = maxLat - minLat;
+    // Map longitude to x
+    const x = ((lon - minLon) / lonRange) * canvasWidth;
 
-      // Map longitude to x
-      const x = ((lon - minLon) / lonRange) * canvasWidth;
+    // map latitude to y (flip vertically so north is up)
+    const y = canvasHeight - ((lat - minLat) / latRange) * canvasHeight;
 
-      // map latitude to y (flip vertically so north is up)
-      const y = canvasHeight - ((lat - minLat) / latRange) * canvasHeight;
-
-      return { x, y };
+    return { x, y };
   }
   
   update() {
     // Step 5: handle movement and interactions
-
+    
   }
 }
 

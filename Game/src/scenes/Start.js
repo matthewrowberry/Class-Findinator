@@ -9,13 +9,13 @@ export class Start extends Phaser.Scene {
         // this.load.image('background', 'assets/space.png');
         // this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
         this.load.json("testMap", "assets/testmap.geojson")
+        this.load.image("player", "assets/spaceship.png")
+        this.cameras.main.setBounds(0, 0, 1920, 1080)
     }
 
     create() {
         this.background = this.add.tileSprite(1280, 720, 2560, 1440, 'background');
         
-        
-
         const ship = this.add.sprite(1280, 720, 'ship');
 
         // world bounds

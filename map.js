@@ -320,8 +320,7 @@ function overlaySave() {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Modes, state
-let mode = 'draw';
+let mode = 'draw'; 
 const latitude = [];
 const longitude = [];
 let count = 0;
@@ -350,30 +349,6 @@ drawButton.addEventListener('click', () => setMode('draw'));
 eraseButton.addEventListener('click', () => setMode('erase'));
 thirdButton.addEventListener('click', () => setMode('measure'));
 
-/**
- * Helper: distance from point (px,py) to segment (x1,y1)-(x2,y2)
- * Returns Euclidean distance in same units as inputs (we pass pixel coords).
- */
-function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const len2 = dx * dx + dy * dy;
-    if (len2 === 0) {
-        // segment is a point
-        const dxp = px - x1;
-        const dyp = py - y1;
-        return Math.sqrt(dxp * dxp + dyp * dyp);
-    }
-    // projection parameter t of point onto segment
-    let t = ((px - x1) * dx + (py - y1) * dy) / len2;
-    t = Math.max(0, Math.min(1, t));
-    const projX = x1 + t * dx;
-    const projY = y1 + t * dy;
-    const dxp = px - projX;
-    const dyp = py - projY;
-    return Math.sqrt(dxp * dxp + dyp * dyp);
-}
-
 map.on('click', function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
@@ -393,29 +368,17 @@ map.on('click', function (e) {
     } else if (mode === 'erase') {
         // --- ERASE MODE ---
         const clickPoint = map.latLngToLayerPoint(e.latlng);
-        const tolerancePx = 10; // increase to 15-20 if clicks are unreliable
-        let deleted = false;
-
+        const tolerancePx = 10;
         for (let i = lines.length - 1; i >= 0; i--) {
             const line = lines[i];
+            if (!map.hasLayer(line)) continue;
 
-            // safety: skip if line is not on map
-            if (!line || !map.hasLayer(line)) continue;
-
-            // get flattened LatLng array (flat handles nested arrays for multi-polylines)
-            const latlngs = (line.getLatLngs ? line.getLatLngs() : []).flat(Infinity);
-
-            if (!Array.isArray(latlngs) || latlngs.length < 2) continue;
-
+            const latlngs = line.getLatLngs().flat(Infinity);
             let minDistPx = Infinity;
 
             for (let j = 0; j < latlngs.length - 1; j++) {
                 const p1 = map.latLngToLayerPoint(latlngs[j]);
                 const p2 = map.latLngToLayerPoint(latlngs[j + 1]);
-
-                // guard against undefined points
-                if (!p1 || !p2) continue;
-
                 const d = pointToSegmentDistance(
                     clickPoint.x, clickPoint.y,
                     p1.x, p1.y,
@@ -425,17 +388,10 @@ map.on('click', function (e) {
             }
 
             if (minDistPx <= tolerancePx) {
-                // remove from map and array
                 map.removeLayer(line);
                 lines.splice(i, 1);
-                deleted = true;
-                console.log('Deleted line at index', i, 'minDistPx=', minDistPx.toFixed(2));
-                break; // remove only the top-most hit
+                break;
             }
-        }
-
-        if (!deleted) {
-            console.log('Erase: no line within tolerance. Increase tolerancePx or check lines[] contents.');
         }
 
     } else if (mode === 'measure') {
@@ -445,15 +401,7 @@ map.on('click', function (e) {
         count++;
         if (count >= 2) {
             drawLine(latitude[0], longitude[0], latitude[1], longitude[1]);
-
-            // example: show distance in meters (Leaflet map.distance)
-            try {
-                const dist = map.distance([latitude[0], longitude[0]], [latitude[1], longitude[1]]);
-                console.log('Measured distance (m):', dist.toFixed(2));
-            } catch (err) {
-                console.warn('Could not compute distance:', err);
-            }
-
+            
             // clear data after one measurement
             latitude.length = 0;
             longitude.length = 0;
@@ -471,6 +419,5 @@ function drawLine(lat1, lng1, lat2, lng2) {
         { color: 'blue' }
     ).addTo(map);
 
-    // ensure lines array tracks it
     lines.push(line);
 }

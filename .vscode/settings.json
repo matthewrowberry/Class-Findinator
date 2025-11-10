@@ -7,5 +7,6 @@
         "projx",
         "projy",
         "testmap"
-    ]
+    ],
+    "liveServer.settings.port": 5501
 }

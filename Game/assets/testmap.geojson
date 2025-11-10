@@ -7,26 +7,6 @@
         "type": "LineString",
         "coordinates": [
           [
-            -111.78,
-            43.81
-          ],
-          [
-            1,
-            1
-          ]
-        ]
-      },
-      "properties": {
-        "name": "Saved Line Map Points",
-        "description": "STC Room line locations"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
             -111.78494215902532,
             43.81452215796811
           ],
