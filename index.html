@@ -23,10 +23,62 @@
     <main>
         <aside id="sidebar">
             <h1>Initialize:</h1>
-            <button id="drawButton" onclick="">Paint_Button</button>
-            <button id="eraseButton" onclick="">Delete_Button</button>
+
             <button id="SaveMapButton" onclick="">Save Map</button>
-            <button id="thirdButton" onclick="">coppy</button>
+
+            <form>
+                <p>Draw Option:</p>
+                <label>
+                    <input type="radio" name="draw" value="none" checked> None
+                </label><br>
+                <label>
+                    <input type="radio" name="draw" value="draw"> Draw
+                </label><br>
+                <label>
+                    <input type="radio" name="draw" value="erase"> Delete
+                </label><br>
+                <p>Choose type:</p>
+                <label>
+                    <input type="radio" name="type" value="none" checked> None
+                </label><br>
+                <label>
+                    <input type="radio" name="type" value="wall"> Wall
+                </label><br>
+                <label>
+                    <input type="radio" name="type" value="walk"> Walkable
+                </label><br>
+                <label>
+                    <input type="radio" name="type" value="noWalk"> non-walk
+                </label><br>
+
+                <p>floor</p>
+                <label>
+                    <input type="radio" name="floor" value="1"> 1
+                </label><br>
+                <label>
+                    <input type="radio" name="floor" value="2" checked> 2
+                </label><br>
+                <label>
+                    <input type="radio" name="floor" value="3"> 3
+                </label><br>
+
+                <p>snapping</p>
+                <label>
+                    <input type="radio" name="snapping" value="y" checked> y
+                </label><br>
+                <label>
+                    <input type="radio" name="snapping" value="n"> n
+                </label><br>
+
+                <p>right angle</p>
+                <label>
+                    <input type="radio" name="right" value="y" checked> y
+                </label><br>
+                <label>
+                    <input type="radio" name="right" value="n"> n
+                </label><br>
+            </form>
+            <button id="Finish" onclick="">Finish segment</button>
         </aside>
         <div id="map"></div>
 
