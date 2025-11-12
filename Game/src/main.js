@@ -1,6 +1,6 @@
 import { Boot } from './scenes/Boot.js';
 import { Preloader } from './scenes/Preloader.js';
-import { Game } from './scenes/Game.js';
+// import { Game } from './scenes/Game.js';
 import { MainScreen } from './scenes/MainScreen.js';
 import { Start } from './scenes/Start.js';
 import { Map } from './features/map.js';
@@ -13,7 +13,7 @@ const config = {
     parent: 'game-container',
     width: 2560,
     height: 1440,
-    backgroundColor: '#000000ff',
+    backgroundColor: '#ffffffff',
     pixelArt: false,
     physics: {
         default: "arcade",
@@ -23,12 +23,12 @@ const config = {
         }
     },
     scene: [
-        Boot,
-        Game,
-        Preloader,
+        // Boot,
+        // Game,
+        // Preloader,
         Start,
         Map,
-        MainScreen,
+        // MainScreen,
 
     ],
     scale: {

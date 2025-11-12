@@ -9,7 +9,7 @@ export class Start extends Phaser.Scene {
     preload() {
         console.log("Start pre-loading")
 
-        this.load.json("testMap", "assets/testmap.geojson")
+        this.load.json("testMap", "assets/Final.geojson")
         this.load.image("player", "assets/testChar2.png")
 
     }

@@ -6,8 +6,8 @@ export class Map extends Phaser.Scene {
   }
 
   preload() {
-    this.load.json('testMap', 'assets/testMap.geojson');
-    this.load.image("player", "assets/testChar2.png")
+    this.load.json('testMap', 'assets/Final.geojson');
+    this.load.image("player", "assets/testChar2.png");
   }
 
   create() {
