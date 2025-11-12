@@ -4,7 +4,7 @@ import ANIMATION from '../assets.js';
 import Map from 'src\features\map.js';
 import Player from 'src\features\Player.js';
 
-class Game extends Phaser.Scene {
+export class Game extends Phaser.Scene {
   constructor() {
     super({key: 'start'});
   }
