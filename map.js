@@ -7,7 +7,8 @@ let tempPolyline = null;
 let previewPolyline = null;
 let currentPoints = [];
 
-
+const SNAP_TOLERANCE_PX = 15;               // max distance for line-snap
+const HV_TOLERANCE_DEG = 0.00002;
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 25,
@@ -53,7 +54,7 @@ document.getElementById('imageUpload').addEventListener('change', function (even
 
             const imageDataURL = e.target.result;
 
-            image = L.imageOverlay(imageDataUrl, imageBounds, { opacity: 0.5 }).addTo(map);
+            image = L.imageOverlay(imageDataURL, imageBounds, { opacity: 0.5 }).addTo(map);
         };
         reader.readAsDataURL(file);
     }
@@ -174,14 +175,14 @@ function refreshGeoJsonLayer() {
             // Only bind popup in non-erase mode
             if (mode !== 'erase') {
                 if (feature.properties && feature.properties.name) {
-                    layer.bindPopup(feature.properties.name);
+                    //layer.bindPopup(feature.properties.name);
                 }
             }
 
             // CRITICAL: Stop click propagation in erase mode
             layer.on('click', function (e) {
                 if (mode === 'erase') {
-                    L.DomEvent.stopPropagation(e); // Prevent map click
+                    //L.DomEvent.stopPropagation(e); // Prevent map click
                     eraseNearestFeature(e.latlng);
                 }
             });
@@ -357,6 +358,98 @@ function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
     return Math.sqrt(dx * dx + dy * dy);
 }
 
+function findSnapPoint(mouseLatLng) {
+    const mousePt = map.latLngToLayerPoint(mouseLatLng);
+    let bestDist = Infinity;
+    let bestLatLng = mouseLatLng;   // fallback = the mouse point itself
+
+    geoJsonLayer.eachLayer(layer => {
+        const latlngs = layer.getLatLngs();   // array or array-of-arrays
+        const rings = layer.feature.geometry.type === 'LineString'
+            ? [latlngs]                 // wrap line
+            : latlngs;                  // polygon rings
+
+        rings.forEach(ring => {
+            // ----- vertex snap -----
+            ring.forEach(p => {
+                const pt = map.latLngToLayerPoint(p);
+                const d = mousePt.distanceTo(pt);
+                if (d < bestDist) {
+                    bestDist = d;
+                    bestLatLng = p;
+                }
+            });
+
+            // ----- edge snap -----
+            for (let i = 0; i < ring.length - 1; i++) {
+                const p1 = map.latLngToLayerPoint(ring[i]);
+                const p2 = map.latLngToLayerPoint(ring[i + 1]);
+                const d = pointToSegmentDistance(
+                    mousePt.x, mousePt.y,
+                    p1.x, p1.y,
+                    p2.x, p2.y
+                );
+                if (d < bestDist) {
+                    bestDist = d;
+                    // project mouse point onto the segment
+                    const proj = projectPointOnSegment(mousePt, p1, p2);
+                    bestLatLng = map.layerPointToLatLng(proj);
+                }
+            }
+        });
+    });
+
+    return { latlng: bestLatLng, distancePx: bestDist };
+}
+
+function projectPointOnSegment(p, a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len2 = dx * dx + dy * dy;
+    if (len2 === 0) return a;
+
+    let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    return L.point(a.x + t * dx, a.y + t * dy);
+}
+
+function hvSnap(lastLatLng, candidateLatLng, angleToleranceDeg = 3) {
+    const dLat = candidateLatLng.lat - lastLatLng.lat;
+    const dLng = candidateLatLng.lng - lastLatLng.lng;
+
+    // Avoid division by zero
+    if (Math.abs(dLat) < 1e-10 && Math.abs(dLng) < 1e-10) {
+        return candidateLatLng;
+    }
+
+    // Compute angle in degrees (0° = east, 90° = north)
+    const angleRad = Math.atan2(dLat, dLng);
+    let angleDeg = angleRad * (180 / Math.PI);
+    if (angleDeg < 0) angleDeg += 360;
+
+    // Normalize to nearest 90° axis
+    const nearest90 = Math.round(angleDeg / 90) * 90;
+    const diff = Math.min(
+        Math.abs(angleDeg - nearest90),
+        Math.abs(angleDeg - (nearest90 - 90)),
+        Math.abs(angleDeg - (nearest90 + 90))
+    );
+
+    // Only snap if within tolerance
+    if (diff <= angleToleranceDeg) {
+        // Snap to nearest axis
+        const snappedAngleRad = (nearest90 * Math.PI) / 180;
+        const length = Math.sqrt(dLat * dLat + dLng * dLng);
+        return L.latLng(
+            lastLatLng.lat + length * Math.sin(snappedAngleRad),
+            lastLatLng.lng + length * Math.cos(snappedAngleRad)
+        );
+    }
+
+    // Too far from 90° → no snap
+    return candidateLatLng;
+}
+
 function eraseNearestFeature(clickLatLng) {
     const clickPoint = map.latLngToLayerPoint(clickLatLng);
     const tolerancePx = 15;
@@ -504,7 +597,43 @@ function getRadio(label) {
 
 
 
-map.on('mousemove', updatePreview);
+//map.on('mousemove', updatePreview);
+
+map.on('mousemove', function (e) {
+    if (mode !== 'draw' || currentPoints.length === 0) {
+        if (previewPolyline) map.removeLayer(previewPolyline);
+        previewPolyline = null;
+        return;
+    }
+
+    let previewPoint = e.latlng;
+
+    // ---- 1. normal line-snap ----
+    if (getRadio('snapping') === 'y') {
+        const snap = findSnapPoint(e.latlng);
+        if (snap.distancePx <= SNAP_TOLERANCE_PX) {
+            previewPoint = snap.latlng;
+        }
+    }
+
+    // ---- 2. horizontal / vertical snap (only if we already have ≥1 point) ----
+    if (getRadio('right') === 'y' && currentPoints.length >= 1) {
+        const last = currentPoints[currentPoints.length - 1];
+        previewPoint = hvSnap(L.latLng(last[0], last[1]), previewPoint);
+    }
+
+    const previewLatLngs = currentPoints.concat([[previewPoint.lat, previewPoint.lng]]);
+
+    if (!previewPolyline) {
+        previewPolyline = L.polyline(previewLatLngs, {
+            color: 'rgba(0,120,255,0.6)',
+            weight: 3,
+            dashArray: '5,10'
+        }).addTo(map);
+    } else {
+        previewPolyline.setLatLngs(previewLatLngs);
+    }
+});
 
 map.on('click', function (e) {
     const lat = e.latlng.lat;
@@ -515,6 +644,24 @@ map.on('click', function (e) {
 
     if (mode === 'draw') {
         // --- DRAW MODE ---
+
+        let finalLatLng = e.latlng;
+
+        if (getRadio('snapping') === 'y') {
+            const snap = findSnapPoint(e.latlng);
+            if (snap.distancePx <= SNAP_TOLERANCE_PX) {
+                finalLatLng = snap.latlng;
+            }
+        }
+
+        if (getRadio('right') === 'y' && currentPoints.length >= 1) {
+            const last = currentPoints[currentPoints.length - 1];
+            finalLatLng = hvSnap(L.latLng(last[0], last[1]), finalLatLng);
+        }
+
+        const lat = finalLatLng.lat;
+        const lng = finalLatLng.lng;
+
         currentPoints.push([lat, lng]);
         latitude.push(lat);
         longitude.push(lng);

@@ -17,45 +17,51 @@ header {
     width: 20%;
     float: left;
     box-sizing: border-box;
-    height: 600px;
+    height: 800px;
 }
 
 
 
 #Flag {
-    background-color : black;
-    color:white;
+    background-color: black;
+    color: white;
     width: 100%
 }
+
 #Player1 {
-    background-color : black;
-    color:white;
+    background-color: black;
+    color: white;
     width: 100%
 }
+
 #Player2 {
-    background-color : black;
-    color:white;
+    background-color: black;
+    color: white;
     width: 100%
 }
+
 #Player3 {
-    background-color : black;
-    color:white;
+    background-color: black;
+    color: white;
     width: 100%
 }
+
 #Player4 {
-    background-color : black;
-    color:white;
+    background-color: black;
+    color: white;
     width: 100%
 }
+
 #Paint_Button {
-    background-color : pink;
-    color:red;
+    background-color: pink;
+    color: red;
     width: 100%
 }
 
 #map {
     height: 580px
 }
+
 img {
     height: 50%;
 }
