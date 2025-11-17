@@ -6,12 +6,18 @@ export class Preloader extends Phaser.Scene {
   preload() {
     // Step 1: load assets (images, GeoJSON, etc.)
 
-    this.load.image('background', 'assets/space.png');
-    this.load.spritesheet('ship', 'assets/spaceship.png', { frameWidth: 176, frameHeight: 96 });
-    this.load.json("testMap", "assets\testmap.geojson")
+    this.load.json("testMap", "assets/Final.geojson")
+    this.load.image("player", "assets/testChar2.png")
+
+
+    this.load.on('filecomplete', (key) => console.log(`✅ Loaded: ${key}`));
+    this.load.on('loaderror', (file) => console.error(`❌ FAILED: ${file.key} - ${file.src}`));
   }
 
   create() {
-    this.Scene.start('Game')
+
+    console.log('Player texture exists?', this.textures.exists('player'));
+
+    this.scene.start('Start')
   }
 }

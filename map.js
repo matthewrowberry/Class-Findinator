@@ -151,11 +151,28 @@ document.getElementById('SaveMapButton').addEventListener('click', function () {
 
 
 //GeoJson Collecting Information
-const geoJson = {
+let geoJson = {
     type: "FeatureCollection",
-    features: [
-    ],
+    features: []
 };
+
+// Load GeoJSON from an external file
+fetch('Final.geojson')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        geoJson = data;  // Assign the loaded GeoJSON to the variable
+        console.log('GeoJSON loaded:', geoJson);
+        refreshGeoJsonLayer();
+        // Your code to use the GeoJSON (e.g., add to map) goes here
+    })
+    .catch(error => {
+        console.error('Error loading GeoJSON:', error);
+    });
 
 function refreshGeoJsonLayer() {
     if (geoJsonLayer) {
@@ -273,7 +290,7 @@ function updatePreview(e) {
 
 
 // Test Walk Area
-addFeature("walk", [[[-111.78497704530064, 43.81452143217765],
+/*addFeature("walk", [[[-111.78497704530064, 43.81452143217765],
 [-111.7849336990262, 43.814664059911415],
 [-111.78470813717772, 43.81450755143178],
 [-111.78491079878144, 43.814440778657136],
@@ -294,7 +311,7 @@ addFeature("wall", [[-111.78494215902532, 43.81452215796811],
 [-111.78489318278858, 43.814521916037975],
 [-111.78489350650473, 43.81447885245585],
 [-111.78494240732802, 43.81447874157049],
-[-111.78494278055466, 43.814507158297026]]);
+[-111.78494278055466, 43.814507158297026]]);*/
 //-----------------------------------------------------------------------------                    
 
 //1st Floor Walkable Area

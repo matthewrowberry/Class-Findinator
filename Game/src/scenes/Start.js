@@ -3,36 +3,36 @@
 
 export class Start extends Phaser.Scene {
     constructor() {
-        super({key: 'start'});
+        super({ key: 'Start' });
     }
 
     preload() {
         console.log("Start pre-loading")
 
-        this.load.json("testMap", "assets/Final.geojson")
-        this.load.image("player", "assets/testChar2.png")
 
     }
 
     create() {
-        this.background = this.add.tileSprite(1280, 720, 2560, 1440, 'background');
+
+        console.log('Player texture exists?', this.textures.exists('player'));
+
+        //this.background = this.add.tileSprite(1280, 720, 2560, 1440, 'background');
 
         // world bounds
         this.physics.world.setBounds(0, 0, 4560, 2440);
 
         // background
-        this.add.tileSprite(0, 0, 2560, 1440, 'background').setOrigin(0, 0);
 
         // player
-        this.player = this.physics.add.sprite(1280 / 2, 720 / 2, 'testChar2');
+        this.player = this.physics.add.sprite(300, 300, 'player');
 
         // camera
         const cam = this.cameras.main;
         cam.setBounds(0, 0, 2560, 1440);
         cam.startFollow(this.player);
         cam.setZoom(0.4);
-        
-        
+
+
 
         // input
         this.keys = this.input.keyboard.addKeys({

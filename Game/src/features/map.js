@@ -11,14 +11,14 @@ export class Map extends Phaser.Scene {
   }
 
   create() {
-    
+
     const testMap = this.cache.json.get('testMap');
     console.log("Loaded map:", testMap);
 
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-
+    this.player = this.physics.add.sprite(300, 300, 'player');
     // Calculate coord bounds
     const lons = [], lats = [];
     testMap.features.forEach(f => {
@@ -66,29 +66,29 @@ export class Map extends Phaser.Scene {
 
 
     testMap.features.forEach(f => {
-    if (f.geometry.type === "Polygon") {
-      f.geometry.coordinates.forEach(polygon => {
-        const coords = polygon.map(c => this.convertCoords(c, bounds,scaleX, scaleY, offsetX, offsetY,
-          canvasHeight)); // adjust scale
+      if (f.geometry.type === "Polygon") {
+        f.geometry.coordinates.forEach(polygon => {
+          const coords = polygon.map(c => this.convertCoords(c, bounds, scaleX, scaleY, offsetX, offsetY,
+            canvasHeight)); // adjust scale
+          graphics.beginPath();
+          graphics.moveTo(coords[0].x, coords[0].y);
+          for (let i = 1; i < coords.length; i++) {
+            graphics.lineTo(coords[i].x, coords[i].y);
+          }
+          graphics.closePath();
+          graphics.strokePath();
+        });
+
+      } else if (f.geometry.type === "LineString") {
+        const coords = f.geometry.coordinates.map(c => this.convertCoords(c, bounds, scaleX, scaleY, offsetX, offsetY,
+          canvasHeight));
         graphics.beginPath();
         graphics.moveTo(coords[0].x, coords[0].y);
         for (let i = 1; i < coords.length; i++) {
           graphics.lineTo(coords[i].x, coords[i].y);
         }
-        graphics.closePath();
         graphics.strokePath();
-      });
-      
-    } else if (f.geometry.type === "LineString") {
-      const coords = f.geometry.coordinates.map(c => this.convertCoords(c, bounds, scaleX, scaleY, offsetX, offsetY,
-          canvasHeight));
-      graphics.beginPath();
-      graphics.moveTo(coords[0].x, coords[0].y);
-      for (let i = 1; i < coords.length; i++) {
-        graphics.lineTo(coords[i].x, coords[i].y);
       }
-      graphics.strokePath();
-    }
     });
 
     console.log("Bounds:", bounds);
@@ -99,19 +99,19 @@ export class Map extends Phaser.Scene {
 
 
 
-    this.player = this.add.sprite(400, 300, 'testChar2');
-    this.cameras.main.startFollow(this.player);
-    console.log("GeoJSON loaded: ",testMap)
+    //this.player = this.add.sprite(400, 300, 'testChar2');
+    //this.cameras.main.startFollow(this.player);
+    console.log("GeoJSON loaded: ", testMap)
 
-    
+
 
   }
 
-  convertCoords([lon, lat], bounds, 
-          scaleX, scaleY, offsetX, offsetY,
-          canvasHeight) {
+  convertCoords([lon, lat], bounds,
+    scaleX, scaleY, offsetX, offsetY,
+    canvasHeight) {
     const { minLon, minLat, maxLat } = bounds;
-    
+
 
     // Map longitude to x
     const x = (lon - minLon) * scaleX + offsetX;
@@ -121,10 +121,10 @@ export class Map extends Phaser.Scene {
 
     return { x, y };
   }
-  
+
   update() {
     // Step 5: handle movement and interactions
-    this.player.update();
+    //this.player.update();
   }
 }
 

@@ -19,15 +19,16 @@ const config = {
         default: "arcade",
         arcade: {
             debug: true,
-        
+
         }
     },
     scene: [
         // Boot,
         // Game,
         // Preloader,
+        Preloader,
         Start,
-        Map,
+        Map
         // MainScreen,
 
     ],
@@ -38,4 +39,3 @@ const config = {
 }
 
 const game = new Phaser.Game(config);
-            
