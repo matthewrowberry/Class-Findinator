@@ -103,6 +103,20 @@ export class Map extends Phaser.Scene {
     //this.cameras.main.startFollow(this.player);
     console.log("GeoJSON loaded: ", testMap)
 
+    const cam = this.cameras.main;
+    cam.setBounds(0, 0, 2560, 1440);
+    cam.startFollow(this.player);
+    cam.setZoom(1.4);
+
+
+
+    // input
+    this.keys = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D
+    });
 
 
   }
@@ -125,8 +139,24 @@ export class Map extends Phaser.Scene {
   update() {
     // Step 5: handle movement and interactions
     //this.player.update();
+
+    const speed = 300;
+    this.player.setVelocity(0);
+
+    if (this.keys.left.isDown) {
+      this.player.setVelocityX(-speed);
+    } else if (this.keys.right.isDown) {
+      this.player.setVelocityX(speed);
+    }
+
+    if (this.keys.up.isDown) {
+      this.player.setVelocityY(-speed);
+    } else if (this.keys.down.isDown) {
+      this.player.setVelocityY(speed);
+    }
   }
 }
+
 
 
 
