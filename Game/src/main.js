@@ -1,9 +1,9 @@
-import { Boot } from './scenes/Boot.js';
-import { Preloader } from './scenes/Preloader.js';
+//import { Boot } from './src_game/scenes/Boot.js';
+import { Preloader } from './src_game/scenes/Preloader.js';
 // import { Game } from './scenes/Game.js';
-import { MainScreen } from './scenes/MainScreen.js';
-import { Start } from './scenes/Start.js';
-import { Map } from './features/map.js';
+//import { MainScreen } from './src_game/scenes/MainScreen.js';
+import { Start } from './src_game/scenes/Start.js';
+import { Map } from './src_game/features/map.js';
 
 
 const config = {
