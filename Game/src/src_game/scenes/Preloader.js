@@ -6,8 +6,8 @@ export class Preloader extends Phaser.Scene {
   preload() {
     // Step 1: load assets (images, GeoJSON, etc.)
 
-    this.load.json("testMap", "assets/Final.geojson")
-    this.load.image("player", "assets/testChar2.png")
+    this.load.json("testMap", "src/src_game/assets/Final.geojson")
+    this.load.image("player", "src/src_game/assets/testChar2.png")
 
 
     this.load.on('filecomplete', (key) => console.log(`✅ Loaded: ${key}`));
