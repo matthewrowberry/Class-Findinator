@@ -38,6 +38,10 @@ export default class PhotonClient {
         this.client.raiseEvent(1, { x, y });
     }
 
+    onNetworkReady() {
+        console.log("Joined Photon Room")
+    }
+
 }
 
 

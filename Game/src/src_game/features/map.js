@@ -1,5 +1,5 @@
 //import { Player } from './features/Player.js';
-
+//import PhotonClient from "../network/PhotonClient";
 export class Map extends Phaser.Scene {
   constructor() {
     super({ key: 'map' });
@@ -7,18 +7,33 @@ export class Map extends Phaser.Scene {
 
   preload() {
     this.load.json('testMap', 'src_game/assets/Final.geojson');
-    this.load.image("player", "src_game/assets/testChar2.png");
+    this.load.json('playerAnimationLeft', 'src_game/assets/animation_left.png');
+    this.load.json('playerAnimationRight', 'src_game/assets/animation_Right.png');
+
+
   }
 
   create() {
+    // --- NETWORK STARTUP ---
+    // this.network = new PhotonClient(this);
+    // this.network.connect();
+    // ---------------------
 
     const testMap = this.cache.json.get('testMap');
-    console.log("Loaded map:", testMap);
+
 
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-    this.player = this.physics.add.sprite(300, 300, 'player');
+    this.player = this.physics.add.sprite(100, 100, 'player');
+    this.player.setScale(0.025);
+    this.player.body.setSize(30, 30)
+
+    // Create a static physics group for walls (immovable boundaries)
+    this.walls = this.physics.add.staticGroup();
+
+    
+
     // Calculate coord bounds
     const lons = [], lats = [];
     testMap.features.forEach(f => {
@@ -106,9 +121,18 @@ export class Map extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setBounds(0, 0, 2560, 1440);
     cam.startFollow(this.player);
-    cam.setZoom(1.4);
+    cam.setZoom(7);
 
-
+    // This is the make the player sprite move.
+    // this.player.anims.create({
+    //         key: 'fly',
+    //         frames: [
+    //           key: animationleft,
+    //           key: animationright,
+    //         ]
+    //         frameRate: 10,
+    //         repeat: -1
+    //     });
 
     // input
     this.keys = this.input.keyboard.addKeys({
@@ -154,6 +178,12 @@ export class Map extends Phaser.Scene {
     } else if (this.keys.down.isDown) {
       this.player.setVelocityY(speed);
     }
+
+
+    //if (this.network) {
+    //    this.network.sendPlayerState(this.player.x, this.player.y);
+    //}
+
   }
 }
 

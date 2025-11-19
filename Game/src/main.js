@@ -1,7 +1,6 @@
-//import { Boot } from './src_game/scenes/Boot.js';
+import { Boot } from './src_game/scenes/Boot.js';
 import { Preloader } from './src_game/scenes/Preloader.js';
-// import { Game } from './scenes/Game.js';
-//import { MainScreen } from './src_game/scenes/MainScreen.js';
+import { MainScreen } from './src_game/scenes/MainScreen.js';
 import { Start } from './src_game/scenes/Start.js';
 import { Map } from './src_game/features/map.js';
 
@@ -23,13 +22,11 @@ const config = {
         }
     },
     scene: [
-        // Boot,
-        // Game,
-        // Preloader,
+        Boot,
         Preloader,
+        MainScreen,
         Start,
         Map
-        // MainScreen,
 
     ],
     scale: {

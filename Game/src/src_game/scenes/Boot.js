@@ -1,12 +1,15 @@
-export class Boot extends Phaser.Scene
-{
-    constructor ()
-    {
-        super('Boot');
+export class Boot extends Phaser.Scene {
+    constructor () {
+        super({key: 'Boot'});
     }
 
-    create ()
-    {
+    preload() {
+        console.log("Start pre-loading")
+
+
+    }
+
+    create () {
         this.scene.start('Preloader');
     }
 }

@@ -7,17 +7,16 @@ export class Preloader extends Phaser.Scene {
     // Step 1: load assets (images, GeoJSON, etc.)
 
     this.load.json("testMap", "src/src_game/assets/Final.geojson")
-    this.load.image("player", "src/src_game/assets/testChar2.png")
+    this.load.image("player", "src/src_game/assets/smile.png")
 
 
-    this.load.on('filecomplete', (key) => console.log(`✅ Loaded: ${key}`));
-    this.load.on('loaderror', (file) => console.error(`❌ FAILED: ${file.key} - ${file.src}`));
+    
   }
 
   create() {
 
-    console.log('Player texture exists?', this.textures.exists('player'));
+    
 
-    this.scene.start('Start')
+    this.scene.start('MainScreen')
   }
 }
