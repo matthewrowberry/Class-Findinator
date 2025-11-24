@@ -1,7 +1,7 @@
 
 // import ASSETS from "src\assets.js"
 export default class Player extends Phaser.Physics.Arcade.Sprite {
-    
+
     // VelocityIncrement = 50;
     // VelocityMax = 200;
     // drag = 1000;
@@ -82,15 +82,21 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         // Movement
         if (this.keys.left.isDown) {
             this.setVelocityX(-this.speed);
+            //this.player.setTexture('RedLeft');
         } else if (this.keys.right.isDown) {
             this.setVelocityX(this.speed);
+            //this.player.setTexture('RedRight');
         }
 
         if (this.keys.up.isDown) {
             this.setVelocityY(-this.speed);
+
         } else if (this.keys.down.isDown) {
+
             this.setVelocityY(this.speed);
         }
+
+
 
         // Optional: normalize diagonal movement
         if (this.body.velocity.length() > this.speed) {

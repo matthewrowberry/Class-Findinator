@@ -1,3 +1,4 @@
+
 import { Boot } from './src_game/scenes/Boot.js';
 import { Preloader } from './src_game/scenes/Preloader.js';
 import { MainScreen } from './src_game/scenes/MainScreen.js';
