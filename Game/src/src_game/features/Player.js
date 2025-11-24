@@ -1,4 +1,4 @@
-import Player from './features/Player.js';
+
 // import ASSETS from "src\assets.js"
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     
@@ -9,7 +9,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
 
 
-    constructor(scene, x, y, texture) {
+    constructor(scene, x, y, texture, network) {
         super(scene, x, y, texture);
 
         // Add to scene + physics
@@ -35,6 +35,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             left: Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D
         });
+
+        // Store the network reference.
+        this.network = network;
     }
 
     // checkInput() {
@@ -92,6 +95,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         // Optional: normalize diagonal movement
         if (this.body.velocity.length() > this.speed) {
             this.body.velocity.normalize().scale(this.speed);
+        }
+
+        if (this.network) {
+            this.network.sendPlayerState(this.x, this.y)
         }
     }
 }

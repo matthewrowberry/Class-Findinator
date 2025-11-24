@@ -1,5 +1,5 @@
-//import { Player } from './features/Player.js';
-//import PhotonClient from "../network/PhotonClient";
+import Player from './Player.js';
+import PhotonClient from "../network/PhotonClient.js";
 export class Map extends Phaser.Scene {
   constructor() {
     super({ key: 'map' });
@@ -15,8 +15,8 @@ export class Map extends Phaser.Scene {
 
   create() {
     // --- NETWORK STARTUP ---
-    // this.network = new PhotonClient(this);
-    // this.network.connect();
+    this.network = new PhotonClient(this);
+    this.network.connect();
     // ---------------------
 
     const testMap = this.cache.json.get('testMap');
@@ -25,7 +25,7 @@ export class Map extends Phaser.Scene {
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-    this.player = this.physics.add.sprite(100, 100, 'player');
+    this.player = new Player(this, 100, 100, 'player', this.network);
     this.player.setScale(0.025);
     this.player.body.setSize(30, 30)
 
@@ -160,29 +160,36 @@ export class Map extends Phaser.Scene {
     return { x, y };
   }
 
-  update() {
+  update(time, delta) {
     // Step 5: handle movement and interactions
-    //this.player.update();
-
-    const speed = 300;
-    this.player.setVelocity(0);
-
-    if (this.keys.left.isDown) {
-      this.player.setVelocityX(-speed);
-    } else if (this.keys.right.isDown) {
-      this.player.setVelocityX(speed);
-    }
-
-    if (this.keys.up.isDown) {
-      this.player.setVelocityY(-speed);
-    } else if (this.keys.down.isDown) {
-      this.player.setVelocityY(speed);
+    if (this.player) {
+      this.player.update()
     }
 
 
-    //if (this.network) {
+
+
+    // this.player.update();
+
+    // const speed = 300;
+    // this.player.setVelocity(0);
+
+    // if (this.keys.left.isDown) {
+    //   this.player.setVelocityX(-speed);
+    // } else if (this.keys.right.isDown) {
+    //   this.player.setVelocityX(speed);
+    // }
+
+    // if (this.keys.up.isDown) {
+    //   this.player.setVelocityY(-speed);
+    // } else if (this.keys.down.isDown) {
+    //   this.player.setVelocityY(speed);
+    // }
+
+
+    // if (this.network) {
     //    this.network.sendPlayerState(this.player.x, this.player.y);
-    //}
+    // }
 
   }
 }

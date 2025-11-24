@@ -1,4 +1,4 @@
-import { LoadBalancingClient, ClientState } from "photon-realtime";
+import { LoadBalancingClient, ClientState } from 'https://cdn.jsdelivr.net/npm/photon-realtime@5.0.0-beta.1/dist/photon-realtime.js';
 
 export default class PhotonClient {
     constructor(game) {
