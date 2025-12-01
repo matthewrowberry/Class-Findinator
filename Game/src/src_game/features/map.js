@@ -7,8 +7,8 @@ export class Map extends Phaser.Scene {
 
   preload() {
     this.load.json('testMap', 'src_game/assets/Final.geojson');
-    this.load.json('playerAnimationLeft', 'src_game/assets/animation_left.png');
-    this.load.json('playerAnimationRight', 'src_game/assets/animation_Right.png');
+    // this.load.json('playerAnimationLeft', 'src_game/assets/animation_left.png');
+    // this.load.json('playerAnimationRight', 'src_game/assets/animation_Right.png');
 
 
   }

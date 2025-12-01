@@ -1,0 +1,56 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{AE49D761-A782-2099-29A5-159B937B43CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "photon-javascript-sdk_v4-4-0-0", "photon-javascript-sdk_v4-4-0-0", "{13852FA9-0FAE-E26E-CFB1-E5FD927B2E02}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{81EF920E-0630-1FF0-D9DA-84D4FFD61446}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo-chat-api", "Game\photon-javascript-sdk_v4-4-0-0\src\demo-chat-api\demo-chat-api.csproj", "{1DAED506-67A4-AEB2-7989-EE16C62C3019}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo-loadbalancing", "Game\photon-javascript-sdk_v4-4-0-0\src\demo-loadbalancing\demo-loadbalancing.csproj", "{F1ED7D03-81BB-4080-8FAB-22EBB42E2446}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo-pairs-mc", "Game\photon-javascript-sdk_v4-4-0-0\src\demo-pairs-mc\demo-pairs-mc.csproj", "{C3327259-B5FF-186D-DA49-82272982065E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo-particle", "Game\photon-javascript-sdk_v4-4-0-0\src\demo-particle\demo-particle.csproj", "{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DAED506-67A4-AEB2-7989-EE16C62C3019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DAED506-67A4-AEB2-7989-EE16C62C3019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DAED506-67A4-AEB2-7989-EE16C62C3019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DAED506-67A4-AEB2-7989-EE16C62C3019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1ED7D03-81BB-4080-8FAB-22EBB42E2446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1ED7D03-81BB-4080-8FAB-22EBB42E2446}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1ED7D03-81BB-4080-8FAB-22EBB42E2446}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1ED7D03-81BB-4080-8FAB-22EBB42E2446}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3327259-B5FF-186D-DA49-82272982065E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3327259-B5FF-186D-DA49-82272982065E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3327259-B5FF-186D-DA49-82272982065E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3327259-B5FF-186D-DA49-82272982065E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{13852FA9-0FAE-E26E-CFB1-E5FD927B2E02} = {AE49D761-A782-2099-29A5-159B937B43CB}
+		{81EF920E-0630-1FF0-D9DA-84D4FFD61446} = {13852FA9-0FAE-E26E-CFB1-E5FD927B2E02}
+		{1DAED506-67A4-AEB2-7989-EE16C62C3019} = {81EF920E-0630-1FF0-D9DA-84D4FFD61446}
+		{F1ED7D03-81BB-4080-8FAB-22EBB42E2446} = {81EF920E-0630-1FF0-D9DA-84D4FFD61446}
+		{C3327259-B5FF-186D-DA49-82272982065E} = {81EF920E-0630-1FF0-D9DA-84D4FFD61446}
+		{89CE6B31-86C5-CDED-FF4E-BAE49CF1DB96} = {81EF920E-0630-1FF0-D9DA-84D4FFD61446}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {27E6D8A8-8C0E-4A36-A484-D20CDE3371BA}
+	EndGlobalSection
+EndGlobal

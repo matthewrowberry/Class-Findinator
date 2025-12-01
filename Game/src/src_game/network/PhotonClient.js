@@ -1,37 +1,38 @@
-import { LoadBalancingClient, ClientState } from 'https://cdn.jsdelivr.net/npm/photon-realtime@5.0.0-beta.1/dist/photon-realtime.js';
-
 export default class PhotonClient {
     constructor(game) {
         this.game = game;
 
-        this.client = new LoadBalancingClient("wss", "0d3559e4-e1bf-4fe5-a345-030a67c30396");
-        this.client.onStateChange = this.onStateCHange.bind(this);
-        this.client.onEvent = this.onEvent.bind(this);
+        if (typeof Photon === "undefined") {
+            throw new Error("Photon.js not loaded! Make sure it's included in HTML before this script.");
+        }
+
+        this.client = new Photon.LoadBalancing.LoadBalancingClient(
+            "us", // Region
+            "0d3559e4-e1bf-4fe5-a345-030a67c30396" // APP ID
+        );
+
+        // Browser SDK uses stateChanged and myEventHandler
+        this.client.stateChanged = function(state) {
+            console.log("Photon state: ", state);
+
+            if (state === Photon.LoadBalancing.ClientState.JoinedLobby) {
+                this.client.joinRandomRoom().catch(() => this.client.createRoom());
+            }
+
+            if (state === Photon.LoadBalancing.ClientState.Joined) {
+                this.game.onNetworkReady(this);
+            }
+        }.bind(this);
+
+        this.client.myEventHandler = function(code, content, actorNr) {
+            if (code === 1) {
+                this.game.updateOtherPlayer(actorNr, content);
+            }
+        }.bind(this);
     }
 
     connect() {
         this.client.connectToRegionMaster("us");
-    }
-    onStateChange(state) {
-        console.log("Photon state: ",state);
-
-        if (state === ClientState.JoinedLobby) {
-            this.client.joinRandomRoom()
-                .catch(() => this.client.createRoom);
-        }
-
-        if (state === ClientState.Joined) {
-            // Ready to send/receive game state
-            this.game.onNetworkReady(this);
-        }
-    }
-
-
-
-    onEvent(code, content, actorNr) {
-        if (code === 1) {
-            this.game.updateOtherPlayer(actorNr, content);
-        }
     }
 
     setPlayerState(x, y) {
@@ -39,9 +40,6 @@ export default class PhotonClient {
     }
 
     onNetworkReady() {
-        console.log("Joined Photon Room")
+        console.log("Joined Photon Room");
     }
-
 }
-
-

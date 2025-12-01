@@ -98,7 +98,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.network) {
-            this.network.sendPlayerState(this.x, this.y)
+            this.network.setPlayerState(this.x, this.y)
         }
     }
 }
