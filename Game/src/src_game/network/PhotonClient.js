@@ -3,22 +3,20 @@ export default class PhotonClient {
         this.game = game;
 
         if (typeof Photon === "undefined") {
-            throw new Error("Photon.js not loaded! Make sure it's included in HTML before this script.");
+            throw new Error("Photon.js not loaded!");
         }
 
         this.client = new Photon.LoadBalancing.LoadBalancingClient(
-            "us", // Region
-            "0d3559e4-e1bf-4fe5-a345-030a67c30396" // APP ID
+            "wss", // Protocol
+            "0d3559e4-e1bf-4fe5-a345-030a67c30396", // App ID
+            "us" // Region
         );
 
-        // Browser SDK uses stateChanged and myEventHandler
         this.client.stateChanged = function(state) {
             console.log("Photon state: ", state);
-
             if (state === Photon.LoadBalancing.ClientState.JoinedLobby) {
                 this.client.joinRandomRoom().catch(() => this.client.createRoom());
             }
-
             if (state === Photon.LoadBalancing.ClientState.Joined) {
                 this.game.onNetworkReady(this);
             }

@@ -1,5 +1,5 @@
-import Player from './Player.js';
-//import PhotonClient from "../network/PhotonClient.js";
+import Player from '../features/Player.js';
+import PhotonClient from "../network/PhotonClient.js";
 export class Map extends Phaser.Scene {
   constructor() {
     super({ key: 'map' });
@@ -7,8 +7,8 @@ export class Map extends Phaser.Scene {
 
   preload() {
     this.load.json('testMap', 'src_game/assets/Final.geojson');
-    // this.load.json('playerAnimationLeft', 'src_game/assets/animation_left.png');
-    // this.load.json('playerAnimationRight', 'src_game/assets/animation_Right.png');
+    this.load.json('playerAnimationLeft', 'src_game/assets/animation_left.png');
+    this.load.json('playerAnimationRight', 'src_game/assets/animation_Right.png');
 
     this.load.json("testMap", "src/src_game/assets/Final.geojson")
     this.load.image("RedStill", "src/src_game/assets/Team_Red_Still.png")
@@ -24,8 +24,8 @@ export class Map extends Phaser.Scene {
 
   create() {
     // --- NETWORK STARTUP ---
-    //this.network = new PhotonClient(this);
-    //this.network.connect();
+    this.network = new PhotonClient(this);
+    this.network.connect();
     // ---------------------
 
     const testMap = this.cache.json.get('testMap');
