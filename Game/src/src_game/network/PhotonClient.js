@@ -3,34 +3,42 @@ export default class PhotonClient {
         this.game = game;
 
         if (typeof Photon === "undefined") {
-            throw new Error("Photon.js not loaded!");
+            throw new Error("Photon.js not loaded! Make sure it's included in HTML before this script.");
         }
 
+        // Correct LoadBalancingClient constructor for browser
         this.client = new Photon.LoadBalancing.LoadBalancingClient(
-            "wss", // Protocol
             "0d3559e4-e1bf-4fe5-a345-030a67c30396", // App ID
-            "us" // Region
+            "usw",                                     // Region ("us", "eu", etc.)
+            { useSecure: true }                        // Options: enables wss://
         );
 
-        this.client.stateChanged = function(state) {
-            console.log("Photon state: ", state);
+        // Handle state changes
+        this.client.stateChanged = (state) => {
+            console.log("Photon state:", state);
+
             if (state === Photon.LoadBalancing.ClientState.JoinedLobby) {
+                // Try joining a random room; create one if none exists
                 this.client.joinRandomRoom().catch(() => this.client.createRoom());
             }
+
             if (state === Photon.LoadBalancing.ClientState.Joined) {
+                // Ready to send/receive game state
                 this.game.onNetworkReady(this);
             }
-        }.bind(this);
+        };
 
-        this.client.myEventHandler = function(code, content, actorNr) {
+        // Handle custom events
+        this.client.myEventHandler = (code, content, actorNr) => {
             if (code === 1) {
                 this.game.updateOtherPlayer(actorNr, content);
             }
-        }.bind(this);
+        };
     }
 
     connect() {
-        this.client.connectToRegionMaster("us");
+        // Connects to the Photon NameServer and then to your region
+        this.client.connectToRegionMaster("usw");
     }
 
     setPlayerState(x, y) {
