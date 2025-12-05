@@ -34,9 +34,22 @@ export class Map extends Phaser.Scene {
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-    this.player = new Player(this, 100, 100, 'RedStill', this.network);
+   this.player = new Player(this, 100, 100, 'RedStill', this.network, "WASD");
+    this.player.texStill = "RedStill";
+    this.player.texLeft  = "RedLeft";
+    this.player.texRight = "RedRight";
     this.player.setScale(0.25);
     this.player.body.setSize(70, 70)
+this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
+
+    this.player2.texStill = "BlueStill";
+    this.player2.texLeft  = "BlueLeft";
+    this.player2.texRight = "BlueRight";
+    this.player2.setScale(0.25);
+    this.player2.body.setSize(70, 70);
+    this.player2.setDepth(2);
+
+    this.player2.hasFlag = false;
 
     // Make sure player renders in front of the flag
     this.player.setDepth(2);
@@ -172,7 +185,12 @@ export class Map extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D
     });
-
+    this.keys2 = this.input.keyboard.addKeys({
+     up: Phaser.Input.Keyboard.KeyCodes.UP,
+     down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+     left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+      right: Phaser.Input.Keyboard.KeyCodes.RIGHT
+});
     // --- FLAG INPUT + SETTINGS ---
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.FLAG_PICKUP_RADIUS = 28; // distance player must be within to pick up the flag
@@ -267,29 +285,28 @@ export class Map extends Phaser.Scene {
 
 
 
-  update(time, delta) {
-    // Step 5: handle movement and interactions
-
+ update(time, delta) {
     if (this.player) this.player.update();
+    if (this.player2) this.player2.update();
 
-    // SPACE PRESSED
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-
-      // Try to pick up the flag
-      this.tryPickupFlag();
-
-      // If no flag pickup happened → try tagging
-      if (!this.player.hasFlag) {
-        this.handleTagAttempt();
-      }
-    }
-
-    // If flag is held, attach it to the holder
+    // Attach flag if someone has it
     if (this.flagHolder) {
-      this.flag.x = this.flagHolder.x;
-      this.flag.y = this.flagHolder.y;
+        this.flag.x = this.flagHolder.x;
+        this.flag.y = this.flagHolder.y;
     }
 
+    // SPACE: Player 1 interacts
+    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+        this.tryPickupFlag(this.player);
+        this.tryTag(this.player);
+    }
+
+    // SHIFT: Player 2 interacts
+    if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT))) {
+        this.tryPickupFlag(this.player2);
+        this.tryTag(this.player2);
+    }
+}
 
 
 
@@ -300,7 +317,7 @@ export class Map extends Phaser.Scene {
     // }
 
   }
-}
+
 
 
 

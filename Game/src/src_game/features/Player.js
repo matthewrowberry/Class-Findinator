@@ -9,36 +9,39 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
 
 
-    constructor(scene, x, y, texture, network) {
-        super(scene, x, y, texture);
+    constructor(scene, x, y, texture, network, controlType = "WASD") {
+    super(scene, x, y, texture);
 
-        // Add to scene + physics
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
 
-        // Enable collisions with world bounds
-        this.setCollideWorldBounds(true);
+    this.setCollideWorldBounds(true);
+    this.speed = 200;
+    // Default animations (can be overridden by scene)
+    this.texStill = texture;      // starting texture
+    this.texLeft = null;
+    this.texRight = null;
 
-        // Make the ship appear above other things like the map.
-        // this.setDepth(100);
-        // this.scene = scene;
+    this.network = network;
 
-        // Store movement speed / Set max.
-        this.speed = 200;
-        // this.setMaxVelocity(this.VelocityMax);
-        // this.setDrag(this.drag);
-
-        //Set up WASD keys
+    // Assign controls based on type
+    if (controlType === "WASD") {
         this.keys = scene.input.keyboard.addKeys({
             up: Phaser.Input.Keyboard.KeyCodes.W,
             down: Phaser.Input.Keyboard.KeyCodes.S,
             left: Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D
         });
-
-        // Store the network reference.
-        this.network = network;
+    } else if (controlType === "ARROWS") {
+        this.keys = scene.input.keyboard.addKeys({
+            up: Phaser.Input.Keyboard.KeyCodes.UP,
+            down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+            left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+            right: Phaser.Input.Keyboard.KeyCodes.RIGHT
+        });
     }
+}
+
 
     // checkInput() {
     //     // Grab all the cursors
@@ -76,35 +79,43 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
 
     update() {
-        // Reset velocity each frame
-        this.setVelocity(0);
+    if (!this.keys) return;
 
-        // Movement
-        if (this.keys.left.isDown) {
-            this.setVelocityX(-this.speed);
-            //this.player.setTexture('RedLeft');
-        } else if (this.keys.right.isDown) {
-            this.setVelocityX(this.speed);
-            //this.player.setTexture('RedRight');
-        }
+    this.setVelocity(0);
 
-        if (this.keys.up.isDown) {
-            this.setVelocityY(-this.speed);
+    let isMoving = false;
 
-        } else if (this.keys.down.isDown) {
+    // Horizontal movement + animations
+    if (this.keys.left.isDown) {
+        this.setVelocityX(-this.speed);
+        isMoving = true;
 
-            this.setVelocityY(this.speed);
-        }
+        if (this.texLeft) this.setTexture(this.texLeft);
 
+    } else if (this.keys.right.isDown) {
+        this.setVelocityX(this.speed);
+        isMoving = true;
 
-
-        // Optional: normalize diagonal movement
-        if (this.body.velocity.length() > this.speed) {
-            this.body.velocity.normalize().scale(this.speed);
-        }
-
-        if (this.network) {
-            this.network.setPlayerState(this.x, this.y)
-        }
+        if (this.texRight) this.setTexture(this.texRight);
     }
+
+    // Vertical movement
+    if (this.keys.up.isDown) {
+        this.setVelocityY(-this.speed);
+        isMoving = true;
+    } else if (this.keys.down.isDown) {
+        this.setVelocityY(this.speed);
+        isMoving = true;
+    }
+
+    // Return to still frame when not moving
+    if (!isMoving) {
+        this.setTexture(this.texStill);
+    }
+
+    // Limit diagonal movement speed
+    if (this.body.velocity.length() > this.speed) {
+        this.body.velocity.normalize().scale(this.speed);
+    }
+}
 }
