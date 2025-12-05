@@ -28,20 +28,25 @@ export class Map extends Phaser.Scene {
     this.network.connect();
     // ---------------------
 
+
     const testMap = this.cache.json.get('testMap');
 
 
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-   this.player = new Player(this, 100, 100, 'RedStill', this.network, "WASD");
+    this.otherPlayers = {};
+
+    // LOCAL PLAYER
+    this.player = new Player(this, 100, 100, 'RedStill', this.network, "WASD");
     this.player.texStill = "RedStill";
     this.player.texLeft  = "RedLeft";
     this.player.texRight = "RedRight";
     this.player.setScale(0.25);
     this.player.body.setSize(70, 70)
-this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
 
+    // SECOND PLAYER (local testing)
+    this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     this.player2.texStill = "BlueStill";
     this.player2.texLeft  = "BlueLeft";
     this.player2.texRight = "BlueRight";
@@ -65,16 +70,18 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     this.flagHolder = null;
     this.player.hasFlag = false;
 
-
+    this.network.client.myEventHandler = (code, content, actorNr) => {
+      if (code === 1) {
+        this.updateOtherPlayer(actorNr, content);
+      }
+    }
 
 
 
     // Create a static physics group for walls (immovable boundaries)
     this.walls = this.physics.add.staticGroup();
 
-
-
-    // Calculate coord bounds
+    // ---- MAP GENERATION ----
     const lons = [], lats = [];
     testMap.features.forEach(f => {
       const coordsArray = (f.geometry.type === "Polygon")
@@ -146,10 +153,6 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
       }
     });
 
-
-
-
-
     console.log("Bounds:", bounds);
     console.log("Canvas:", canvasWidth, canvasHeight);
 
@@ -162,6 +165,8 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     //this.cameras.main.startFollow(this.player);
     console.log("GeoJSON loaded: ", testMap)
 
+
+    // ---- CAMERA ----
     const cam = this.cameras.main;
     cam.setBounds(0, 0, 2560, 1440);
     cam.startFollow(this.player);
@@ -178,7 +183,7 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     //         repeat: -1
     //     });
 
-    // input
+    // ---- INPUT ----
     this.keys = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       down: Phaser.Input.Keyboard.KeyCodes.S,
@@ -194,15 +199,6 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     // --- FLAG INPUT + SETTINGS ---
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.FLAG_PICKUP_RADIUS = 28; // distance player must be within to pick up the flag
-
-
-
-
-
-
-
-
-
   }
 
   convertCoords([lon, lat], bounds,
@@ -220,7 +216,21 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     return { x, y };
   }
 
+  // ---- NETWORK METHODS ----
+  updateOtherPlayer(actorNr, content) {
+    if (!this.other.Players[actorNr]) {
+      this.otherPlayers[actorNr] = new Player(this, content.x, content.y, 'BlueStill', null);
+    } else {
+      const other = this.otherPlayers[actorNr];
+      other.x = content.x;
+      other.y = content.y;
+    }
 
+  }
+
+  
+
+  // ---- FLAG METHODS ----
   pickUpFlag(player) {
     this.flagHolder = player;
     player.hasFlag = true;
@@ -283,9 +293,7 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
     }
   }
 
-
-
- update(time, delta) {
+  update(time, delta) {
     if (this.player) this.player.update();
     if (this.player2) this.player2.update();
 
@@ -306,17 +314,12 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
         this.tryPickupFlag(this.player2);
         this.tryTag(this.player2);
     }
-}
 
-
-
-
-
-    // if (this.network) {
-    //    this.network.sendPlayerState(this.player.x, this.player.y);
-    // }
-
+    if (this.network && this.player) {
+      this.network.setPlayerState(this.player.x, this.player.y);
+    }
   }
+}
 
 
 
