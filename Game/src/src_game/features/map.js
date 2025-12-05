@@ -295,11 +295,11 @@ this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
         this.flag.y = this.flagHolder.y;
     }
 
-    // SPACE: Player 1 interacts
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-        this.tryPickupFlag(this.player);
-        this.tryTag(this.player);
-    }
+    // // SPACE: Player 1 interacts
+    // if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+    //     this.tryPickupFlag(this.player);
+    //     this.tryTag(this.player);
+    // }
 
     // SHIFT: Player 2 interacts
     if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT))) {
