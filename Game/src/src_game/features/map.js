@@ -132,7 +132,7 @@ export class Map extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setBounds(0, 0, 2560, 1440);
     cam.startFollow(this.player);
-    cam.setZoom(10);
+    cam.setZoom(8);
 
     // --- INPUT ---
     this.keys = this.input.keyboard.addKeys({ up: "W", down: "S", left: "A", right: "D" });
