@@ -191,12 +191,36 @@ export class Map extends Phaser.Scene {
 
   // === INTERACTION FOR PLAYER 1 ===
   if (Phaser.Input.Keyboard.JustDown(this.interactP1)) {
-    this.handleInteraction(this.player);
+    // Try to pick up flag if nearby
+    const distToFlag = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.flag.x, this.flag.y);
+    if (!this.player.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
+        this.pickUpFlag(this.player);
+    }
+
+    // Try to tag Player 2 if they have the flag
+    if (this.player2.hasFlag) {
+        const distToPlayer2 = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.player2.x, this.player2.y);
+        if (distToPlayer2 < this.FLAG_PICKUP_RADIUS) {
+            this.dropFlag(this.player2);
+        }
+    }
   }
 
   // === INTERACTION FOR PLAYER 2 ===
   if (Phaser.Input.Keyboard.JustDown(this.interactP2)) {
-    this.handleInteraction(this.player2);
+    // Try to pick up flag if nearby
+    const distToFlag = Phaser.Math.Distance.Between(this.player2.x, this.player2.y, this.flag.x, this.flag.y);
+    if (!this.player2.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
+        this.pickUpFlag(this.player2);
+    }
+
+    // Try to tag Player 1 if they have the flag
+    if (this.player.hasFlag) {
+        const distToPlayer1 = Phaser.Math.Distance.Between(this.player2.x, this.player2.y, this.player.x, this.player.y);
+        if (distToPlayer1 < this.FLAG_PICKUP_RADIUS) {
+            this.dropFlag(this.player);
+        }
+    }
   }
 
   // Flag follow logic
@@ -214,20 +238,20 @@ export class Map extends Phaser.Scene {
     }
   }
 }
-handleInteraction(player) {
-  const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
+// handleInteraction(player) {
+//   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
 
-  // Picking up the flag
-  if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
-    this.pickUpFlag(player);
-    return;
-  }
+//   // Picking up the flag
+//   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
+//     this.pickUpFlag(player);
+//     return;
+//   }
 
-  // Dropping the flag
-  if (player.hasFlag) {
-    this.dropFlag(player);
-    return;
-  }
-}
+//   // Dropping the flag
+//   if (player.hasFlag) {
+//     this.dropFlag(player);
+//     return;
+//   }
+// }
 
 }
