@@ -7,7 +7,7 @@ export class Map extends Phaser.Scene {
 
   init(data) {
     // Receive the Photon client from the menu
-    this.network = data.photon;
+    this.network = data.photon || null;
     this.network.scene = this; // update the scene reference if needed
   }
 
@@ -27,6 +27,9 @@ export class Map extends Phaser.Scene {
     const testMap = this.cache.json.get('testMap');
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
+
+    
+
 
     this.otherPlayers = {};
 

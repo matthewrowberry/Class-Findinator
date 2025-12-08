@@ -20,23 +20,27 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
 
     onStateChange(state) {
         console.log("Photon State:", state);
-        // Call scene handlers if needed
-        if (state === ClientState.JoinedLobby) {
-            this.joinRandomRoom().catch(() => this.createRoom());
-        }
+        // Call scene handler on Joined
         if (state === ClientState.Joined) {
-            if (this.scene.onNetworkReady) this.scene.onNetworkReady(this);
+            if (this.scene && this.scene.onNetworkReady) {
+                this.scene.onNetworkReady(this);
+            }
         }
     }
 
-    onJoinRoom() {
-        console.log("Joined Photon room!");
+    onJoinRoom(createdByMe) {
+        super.onJoinRoom(createdByMe);
+        console.log("Joined Photon room!", createdByMe ? "(Created)" : "(Joined)");
+
+        // Scene callback (consistent: onNetworkReady)
+        if (this.scene && this.scene.onNetworkReady) {
+            this.scene.onNetworkReady(this);
+        }
+
+        // User's callback (e.g., start map scene)
+        if (this.onJoinRoom) this.onJoinRoom(createdByMe);
     }
 
-    onJoinLobby() {
-        console.log("Joined lobby, joining default room...");
-        this.joinRandomRoom();
-    }
 
     onEvent(code, content, actorNr) {
         if (this.myEventHandler) this.myEventHandler(code, content, actorNr);

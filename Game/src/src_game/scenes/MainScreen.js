@@ -51,16 +51,22 @@ export class MainScreen extends Phaser.Scene {
 
     // Assign handlers BEFORE connecting
     photon.onJoinLobby = () => {
-      if (isHost) {
-        photon.createRoom();
-      } else {
-        photon.joinRandomRoom();
-      }
+        console.log(isHost ? "HOST: Creating room..." : "JOIN: Joining random room...");
+        if (isHost) {
+            photon.createRoom()
+                .catch(err => console.error("Create room failed:", err));
+        } else {
+            photon.joinRandomRoom()
+                .catch(err => {
+                console.error("No room found, auto-creating for testing:", err);
+                photon.createRoom();  // Fallback for solo JOIN
+            });
+        }
     };
 
-    photon.onJoinRoom = () => {
-      console.log("Joined room, starting map...");
-      this.scene.start('map', { photon });
+    photon.onJoinRoom = () => {  // No param needed
+        console.log("Joined room, starting map...");
+        this.scene.start('map', { photon });
     };
 
     photon.connect();
