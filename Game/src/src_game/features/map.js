@@ -212,8 +212,6 @@ handleInteraction(player) {
   // Picking up the flag
   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
     this.pickUpFlag(player);
-    this.flag.x = player.x;
-    this.flag.y = player.y;
     return;
   }
 
