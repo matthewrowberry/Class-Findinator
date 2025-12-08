@@ -28,7 +28,17 @@ export class Map extends Phaser.Scene {
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
-    
+    // PHOTON NETWORK HANDLER
+    if (this.network) {
+        console.log("Photon network received in Map Scene.");
+        this.network.myEventHandler = (code, content, actorNr) => {
+            if (code === 1) this.updateOtherPlayer(actorNr, content);
+        };
+        // Optional: Ready callback
+        this.network.onNetworkReady = (client) => {
+            console.log("Network fully ready!");
+        };
+    }
 
 
     this.otherPlayers = {};
@@ -129,13 +139,6 @@ export class Map extends Phaser.Scene {
     this.keys2 = this.input.keyboard.addKeys({ up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT" });
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.FLAG_PICKUP_RADIUS = 28;
-
-    // --- PHOTON EVENT HANDLER ---
-    if (this.network) {
-      this.network.myEventHandler = (code, content, actorNr) => {
-        if (code === 1) this.updateOtherPlayer(actorNr, content);
-      };
-    }
   }
 
   convertCoords([lon, lat], bounds, scaleX, scaleY, offsetX, offsetY, canvasHeight) {
@@ -182,6 +185,14 @@ export class Map extends Phaser.Scene {
 
     if (this.network && this.player) {
       this.network.setPlayerState(this.player.x, this.player.y);
+    }
+
+    if (this.network && this.player) {
+      const now = this.game.getTime();
+      if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
+        this.network.setPlayerState(this.player.x, this.player.y);
+        this.lastNetUpdate = now;
+      }
     }
   }
 }

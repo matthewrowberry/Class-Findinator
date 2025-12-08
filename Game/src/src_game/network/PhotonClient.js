@@ -2,14 +2,14 @@ import { ClientState } from "./ClientState.js";
 
 export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClient {
     constructor(scene) {
-        super(Photon.ConnectionProtocol.Wss, "0d3559e4-e1bf-4fe5-a345-030a67c30396", "1.0"); 
+        super(Photon.ConnectionProtocol.Wss, "0d3559e4-e1bf-4fe5-a345-030a67c30396", "1.0");
         this.scene = scene;
 
-        this.logger = new Photon.Logger("info"); // optional logging
-        this.myEventHandler = null; // for game events
+        this.logger = new Photon.Logger("info");
+        this.myEventHandler = null;
 
-        // bind state change
-        this.stateChanged = (state) => this.onStateChange(state);
+        // Scene callback for joining a room (MainScreen will set this)
+        this.onRoomJoinedCallback = null;
     }
 
     connect() {
@@ -20,27 +20,20 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
 
     onStateChange(state) {
         console.log("Photon State:", state);
-        // Call scene handler on Joined
-        if (state === ClientState.Joined) {
-            if (this.scene && this.scene.onNetworkReady) {
-                this.scene.onNetworkReady(this);
-            }
+        super.onStateChange(state);
+        // Trigger scene-ready callback if needed
+        if (state === ClientState.Joined && this.scene && this.scene.onNetworkReady) {
+            this.scene.onNetworkReady(this);
         }
     }
 
     onJoinRoom(createdByMe) {
         super.onJoinRoom(createdByMe);
         console.log("Joined Photon room!", createdByMe ? "(Created)" : "(Joined)");
-
-        // Scene callback (consistent: onNetworkReady)
-        if (this.scene && this.scene.onNetworkReady) {
-            this.scene.onNetworkReady(this);
+        if (this.onRoomJoinedCallback) {
+            this.onRoomJoinedCallback(createdByMe);
         }
-
-        // User's callback (e.g., start map scene)
-        if (this.onJoinRoom) this.onJoinRoom(createdByMe);
     }
-
 
     onEvent(code, content, actorNr) {
         if (this.myEventHandler) this.myEventHandler(code, content, actorNr);
