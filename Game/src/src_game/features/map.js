@@ -138,6 +138,9 @@ export class Map extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys({ up: "W", down: "S", left: "A", right: "D" });
     this.keys2 = this.input.keyboard.addKeys({ up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT" });
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.interactP1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.interactP2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
     this.FLAG_PICKUP_RADIUS = 28;
   }
 
@@ -175,24 +178,50 @@ export class Map extends Phaser.Scene {
   }
 
   update() {
-    if (this.player) this.player.update();
-    if (this.player2) this.player2.update();
+  if (this.player) this.player.update();
+  if (this.player2) this.player2.update();
 
-    if (this.flagHolder) {
-      this.flag.x = this.flagHolder.x;
-      this.flag.y = this.flagHolder.y;
-    }
+  // === INTERACTION FOR PLAYER 1 ===
+  if (Phaser.Input.Keyboard.JustDown(this.interactP1)) {
+    this.handleInteraction(this.player);
+  }
 
-    if (this.network && this.player) {
+  // === INTERACTION FOR PLAYER 2 ===
+  if (Phaser.Input.Keyboard.JustDown(this.interactP2)) {
+    this.handleInteraction(this.player2);
+  }
+
+  // Flag follow logic
+  if (this.flagHolder) {
+    this.flag.x = this.flagHolder.x;
+    this.flag.y = this.flagHolder.y;
+  }
+
+  // Network updates...
+  if (this.network && this.player) {
+    const now = this.game.getTime();
+    if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
       this.network.setPlayerState(this.player.x, this.player.y);
-    }
-
-    if (this.network && this.player) {
-      const now = this.game.getTime();
-      if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
-        this.network.setPlayerState(this.player.x, this.player.y);
-        this.lastNetUpdate = now;
-      }
+      this.lastNetUpdate = now;
     }
   }
+}
+handleInteraction(player) {
+  const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
+
+  // Picking up the flag
+  if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
+    this.pickUpFlag(player);
+    this.flag.x = player.x;
+    this.flag.y = player.y;
+    return;
+  }
+
+  // Dropping the flag
+  if (player.hasFlag) {
+    this.dropFlag(player);
+    return;
+  }
+}
+
 }
