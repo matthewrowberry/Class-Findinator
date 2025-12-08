@@ -19,11 +19,11 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
     }
 
     onStateChange(state) {
-        console.log("Photon State:", state);
-        super.onStateChange(state);
-        // Trigger scene-ready callback if needed
-        if (state === ClientState.Joined && this.scene && this.scene.onNetworkReady) {
-            this.scene.onNetworkReady(this);
+        console.log("Photon State Changed:", state, Photon.LoadBalancing.ClientState);
+    
+        if (state === Photon.LoadBalancing.ClientState.Joined) {
+            console.log("Photon Client is fully joined!");
+            if (this.scene && this.scene.onNetworkReady) this.scene.onNetworkReady(this);
         }
     }
 

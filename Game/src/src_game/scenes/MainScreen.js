@@ -38,33 +38,42 @@ export class MainScreen extends Phaser.Scene {
   }
 
   startGame(isHost) {
-    // --- Initialize Photon ---
+    console.log(isHost ? "Hosting game..." : "Joining game...");
+
+    const sceneRef = this; // save scene reference
     const photon = new PhotonClient(this);
 
-    // --- Handler: once joined lobby, create or join room ---
+     // --- LOBBY CALLBACK ---
     photon.onJoinLobby = () => {
       console.log(isHost ? "HOST: Creating room..." : "JOIN: Joining random room...");
       if (isHost) {
-        photon.createRoom().catch(err => console.error("Create room failed:", err));
+        photon.createRoom().catch(err => {
+          console.error("Create room failed:", err);
+          // fallback for testing
+          sceneRef.scene.start('map', { photon });
+        });
       } else {
         photon.joinRandomRoom().catch(err => {
-          console.warn("No room found, attempting to create one instead...", err);
-          photon.createRoom(); // now triggers onJoinRoom
+          console.warn("No room found, auto-creating for testing:", err);
+          photon.createRoom();
         });
       }
     };
 
-    // --- Handler: only start map AFTER joining room ---
+    // --- ROOM JOINED CALLBACK ---
     photon.onJoinRoom = () => {
-      console.log("Joined room successfully! Starting map...");
-      this.scene.start('map', { photon }); // <-- pass Photon client to Map scene
+      console.log("Room joined, starting Map scene...");
+      sceneRef.scene.start('map', { photon }); // Use saved scene reference
     };
 
-    // Optional: log errors
-    photon.onError = (code, msg) => console.error("Photon error:", code, msg);
+    // --- SAFETY FALLBACK ---
+    setTimeout(() => {
+      if (!photon.roomJoined) {
+        console.warn("Photon fallback: going to map scene...");
+        sceneRef.scene.start('map', { photon });
+      }
+    }, 3000);
 
-    // --- Connect to Photon ---
-    console.log("Connecting to Photon...");
-    photon.connect();
+    photon.connect(); //Start connecting after callbacks are set
   }
 }
