@@ -22,19 +22,22 @@ export class Map extends Phaser.Scene {
     this.load.image("flag", "src/src_game/assets/blueflag.png");
     this.load.image("redflag", "src/src_game/assets/redflag.png");
 
-    this.load.image("RedStillFlag", "src/src_game/assets/spaceship.png");
-    this.load.image("RedLeftFlag", "src/src_game/assets/spaceship.png");
-    this.load.image("RedRightFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("RedStillFlag", "src/src_game/assets/Team_Red_Still_Flag.png");
+    this.load.image("RedLeftFlag", "src/src_game/assets/Team_Red_Left_Flag.png");
+    this.load.image("RedRightFlag", "src/src_game/assets/Team_Red_Right_Flag.png");
 
-    this.load.image("BlueStillFlag", "src/src_game/assets/spaceship.png");
-    this.load.image("BlueLeftFlag", "src/src_game/assets/spaceship.png");
-    this.load.image("BlueRightFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("BlueStillFlag", "src/src_game/assets/Team_Blue_Still_Flag.png");
+    this.load.image("BlueLeftFlag", "src/src_game/assets/Team_Blue_Left_Flag.png");
+    this.load.image("BlueRightFlag", "src/src_game/assets/Team_Blue_Right_Flag.png");
   }
 
   create() {
     const testMap = this.cache.json.get('testMap');
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
+
+    // Set Matter world bounds to match the camera bounds
+    this.matter.world.setBounds(0, 0, 2560, 1440);
 
     // PHOTON NETWORK HANDLER
     if (this.network) {
@@ -52,29 +55,35 @@ export class Map extends Phaser.Scene {
     this.otherPlayers = {};
 
     // --- PLAYER SETUP ---
-    this.player = new Player(this, 100, 100, 'RedStill', this.network, "WASD");
+    this.player = new Player(this, 600, 400, 'RedStill', this.network);
     this.player.texStill = "RedStill";
     this.player.texLeft = "RedLeft";
     this.player.texRight = "RedRight";
+    this.player.texStillFlag = "RedStillFlag";
+    this.player.texLeftFlag = "RedLeftFlag";
+    this.player.texRightFlag = "RedRightFlag";
     this.player.setScale(0.25);
-    this.player.body.setSize(70, 70);
+    this.player.setCollisionGroup(-1);
 
-    this.player2 = new Player(this, 200, 100, 'BlueStill', null, "ARROWS");
+    this.player2 = new Player(this, 600, 300, 'BlueStill', null, "ARROWS");
     this.player2.texStill = "BlueStill";
     this.player2.texLeft = "BlueLeft";
     this.player2.texRight = "BlueRight";
+    this.player2.texStillFlag = "BlueStillFlag";
+    this.player2.texLeftFlag = "BlueLeftFlag";
+    this.player2.texRightFlag = "BlueRightFlag";
     this.player2.setScale(0.25);
-    this.player2.body.setSize(70, 70);
+    this.player2.setCollisionGroup(-1); // Prevent player-player collisions
     this.player2.setDepth(2);
     this.player2.hasFlag = false;
 
     this.player.setDepth(2);
 
     // --- FLAG SETUP ---
-    this.flag = this.physics.add.sprite(300, 300, 'redflag');
+    this.flag = this.matter.add.sprite(350, 300, 'redflag');
     this.flag.setScale(0.5);
-    this.flag.body.setSize(30, 30);
-    this.flag.setCollideWorldBounds(true);
+    this.flag.setRectangle(30, 30);
+    this.flag.setCollisionGroup(-1);
     this.flagHolder = null;
     this.player.hasFlag = false;
 
@@ -126,6 +135,30 @@ export class Map extends Phaser.Scene {
           for (let i = 1; i < coords.length; i++) graphics.lineTo(coords[i].x, coords[i].y);
           graphics.closePath();
           graphics.strokePath();
+
+          // Create static polygon body for collision
+          const verts = coords;
+          let centerX = 0, centerY = 0;
+          verts.forEach(v => { centerX += v.x; centerY += v.y; });
+          centerX /= verts.length;
+          centerY /= verts.length;
+
+          for (let i = 0; i < coords.length - 1; i++) {
+            const p1 = coords[i];
+            const p2 = coords[i + 1];
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+
+            this.matter.add.rectangle(midX, midY, length, 5, {
+              angle: angle,
+              isStatic: true,
+              render: { visible: true }
+            });
+          }
         });
       } else if (f.geometry.type === "LineString") {
         const coords = f.geometry.coordinates.map(c => this.convertCoords(c, bounds, scaleX, scaleY, offsetX, offsetY, canvasHeight));
@@ -133,12 +166,33 @@ export class Map extends Phaser.Scene {
         graphics.moveTo(coords[0].x, coords[0].y);
         for (let i = 1; i < coords.length; i++) graphics.lineTo(coords[i].x, coords[i].y);
         graphics.strokePath();
+
+        // Create static bodies for each line segment
+        for (let i = 0; i < coords.length - 1; i++) {
+          const p1 = coords[i];
+          const p2 = coords[i + 1];
+          const midX = (p1.x + p2.x) / 2;
+          const midY = (p1.y + p2.y) / 2;
+          const dx = p2.x - p1.x;
+          const dy = p2.y - p1.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const angle = Math.atan2(dy, dx);
+
+          this.matter.add.rectangle(midX, midY, length, 5, {
+            angle: angle,
+            isStatic: true,
+            render: { visible: true }
+          });
+        }
       }
     });
 
     // --- CAMERA ---
+    const mapWidth = lonRange * scaleX + 2 * offsetX;  // Account for offsets
+    const mapHeight = latRange * scaleY + 2 * offsetY;
+
     const cam = this.cameras.main;
-    cam.setBounds(0, 0, 2560, 1440);
+    cam.setBounds(0, 0, mapWidth, mapHeight);
     cam.startFollow(this.player);
     cam.setZoom(8);
 
@@ -162,6 +216,7 @@ export class Map extends Phaser.Scene {
   updateOtherPlayer(actorNr, content) {
     if (!this.otherPlayers[actorNr]) {
       this.otherPlayers[actorNr] = new Player(this, content.x, content.y, 'BlueStill', null);
+      this.otherPlayers[actorNr].setCollisionGroup(-1); // Prevent collisions
     } else {
       const other = this.otherPlayers[actorNr];
       other.x = content.x;
@@ -170,10 +225,13 @@ export class Map extends Phaser.Scene {
   }
 
   pickUpFlag(player) {
+    if (this.flagHolder)
+      return
+
     this.flagHolder = player;
     player.hasFlag = true;
     this.flag.setVisible(false);
-    this.flag.body.enable = false;
+    this.matter.world.remove(this.flag.body);
   }
 
   dropFlag(holder) {
@@ -181,8 +239,8 @@ export class Map extends Phaser.Scene {
     holder.hasFlag = false;
     this.flagHolder = null;
     this.flag.setVisible(true);
-    this.flag.body.enable = true;
     this.flag.setPosition(holder.x, holder.y);
+    this.matter.world.add(this.flag.body);
   }
 
   update() {
