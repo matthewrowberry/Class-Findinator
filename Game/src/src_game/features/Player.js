@@ -2,13 +2,6 @@
 // import ASSETS from "src\assets.js"
 export default class Player extends Phaser.Physics.Arcade.Sprite {
 
-    // VelocityIncrement = 50;
-    // VelocityMax = 200;
-    // drag = 1000;
-    // health = 100;
-
-
-
     constructor(scene, x, y, texture, network, controlType = "WASD") {
     super(scene, x, y, texture);
 
@@ -42,42 +35,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 }
 
-
-    // checkInput() {
-    //     // Grab all the cursors
-    //     const cursors = this.scene.cursors;
-
-    //     // Set all the keys as variables.
-    //     const LeftKey = cursors.left.isDown;
-    //     const RightKey = cursors.right.isDown;
-    //     const upKey = cursors.up.isDown;
-    //     const downKey = cursors.down.isDown;
-    //     const spaceKey = cursors.space.isDown;
-
-    //     // Set the default movement as none if no keys are pressed.
-    //     const moveDirection = { x: 0, y: 0 };
-
-    //     if (leftKey) moveDirection.x--;
-    //     if (rightKey) moveDirection.x++;
-    //     if (upKey) moveDirection.y--;
-    //     if (downKey) moveDirection.y++;
-    //     if (spaceKey) this.PickUpFlag();
-
-    //     // increment the movespeed as the directional key is held down.
-    //     // Exp: left key is pressed and x goes to -1 and is multiplied
-    //     // by 50 so the move velocity is -50 so we move at a speed that
-    //     // is noticable. This is in the x direction
-    //     this.body.velocity.x += moveDirection.x * this.velocityIncrement;
-
-    //     // Do the same thing above but in the y axis.
-    //     this.body.velocity.y += moveDirection.y * this.velocityIncrement;
-
-    // }
-
-
-
-
-
     update() {
     if (!this.keys) return;
 
@@ -85,18 +42,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     let isMoving = false;
 
+    const texLeft = this.hasFlag && this.texLeftFlag ? this.texLeftFlag : this.texLeft;
+    const texRight = this.hasFlag && this.texRightFlag ? this.texRightFlag : this.texRight;
+    const texStill = this.hasFlag && this.texStillFlag ? this.texStillFlag : this.texStill;
+
     // Horizontal movement + animations
     if (this.keys.left.isDown) {
         this.setVelocityX(-this.speed);
         isMoving = true;
 
-        if (this.texLeft) this.setTexture(this.texLeft);
+        if (this.texLeft) this.setTexture(texLeft);
 
     } else if (this.keys.right.isDown) {
         this.setVelocityX(this.speed);
         isMoving = true;
 
-        if (this.texRight) this.setTexture(this.texRight);
+        if (this.texRight) this.setTexture(texRight);
     }
 
     // Vertical movement
@@ -110,7 +71,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Return to still frame when not moving
     if (!isMoving) {
-        this.setTexture(this.texStill);
+        this.setTexture(texStill);
     }
 
     // Limit diagonal movement speed

@@ -21,6 +21,14 @@ export class Map extends Phaser.Scene {
     this.load.image("BlueRight", "src/src_game/assets/Team_Blue_Right.png");
     this.load.image("flag", "src/src_game/assets/blueflag.png");
     this.load.image("redflag", "src/src_game/assets/redflag.png");
+
+    this.load.image("RedStillFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("RedLeftFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("RedRightFlag", "src/src_game/assets/spaceship.png");
+
+    this.load.image("BlueStillFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("BlueLeftFlag", "src/src_game/assets/spaceship.png");
+    this.load.image("BlueRightFlag", "src/src_game/assets/spaceship.png");
   }
 
   create() {

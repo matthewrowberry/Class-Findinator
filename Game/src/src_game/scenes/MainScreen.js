@@ -43,7 +43,8 @@ export class MainScreen extends Phaser.Scene {
     const sceneRef = this; // save scene reference
     const photon = new PhotonClient(this);
 
-     // --- LOBBY CALLBACK ---
+    // --- LOBBY CALLBACK ---
+    // Photon SDK triggers onJoinLobby; set it here so we can create/join rooms after lobby join
     photon.onJoinLobby = () => {
       console.log(isHost ? "HOST: Creating room..." : "JOIN: Joining random room...");
       if (isHost) {
@@ -55,25 +56,28 @@ export class MainScreen extends Phaser.Scene {
       } else {
         photon.joinRandomRoom().catch(err => {
           console.warn("No room found, auto-creating for testing:", err);
+          // attempt create as a fallback for local dev/test
           photon.createRoom();
         });
       }
     };
 
     // --- ROOM JOINED CALLBACK ---
-    photon.onJoinRoom = () => {
-      console.log("Room joined, starting Map scene...");
-      sceneRef.scene.start('map', { photon }); // Use saved scene reference
+    // Use the dedicated callback property on the PhotonClient to avoid overwriting internal SDK methods
+    photon.onRoomJoinedCallback = (createdByMe) => {
+      console.log("Room joined (callback). createdByMe=", createdByMe);
+      sceneRef.scene.start('map', { photon });
     };
 
     // --- SAFETY FALLBACK ---
     setTimeout(() => {
       if (!photon.roomJoined) {
-        console.warn("Photon fallback: going to map scene...");
+        console.warn("Photon fallback: going to map scene (no roomJoined after timeout)...");
         sceneRef.scene.start('map', { photon });
       }
     }, 3000);
 
-    photon.connect(); //Start connecting after callbacks are set
+    // Start connecting after callbacks are set
+    photon.connect();
   }
 }
