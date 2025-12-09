@@ -8,8 +8,13 @@ export class Map extends Phaser.Scene {
   init(data) {
     // Receive the Photon client from the menu
     this.network = data.photon || null;
-    this.network.scene = this; // update the scene reference if needed
-  }
+
+    // Only set scene if network exists
+    if (this.network) {
+        this.network.scene = this;
+    }
+}
+
 
   preload() {
     this.load.json("testMap", "src/src_game/assets/Final.geojson");
@@ -55,7 +60,7 @@ export class Map extends Phaser.Scene {
     this.otherPlayers = {};
 
     // --- PLAYER SETUP ---
-    this.player = new Player(this, 600, 400, 'RedStill', this.network);
+    this.player = new Player(this, 110, 1200, 'RedStill', this.network, "WASD");
     this.player.texStill = "RedStill";
     this.player.texLeft = "RedLeft";
     this.player.texRight = "RedRight";
@@ -65,7 +70,7 @@ export class Map extends Phaser.Scene {
     this.player.setScale(0.25);
     this.player.setCollisionGroup(-1);
 
-    this.player2 = new Player(this, 600, 300, 'BlueStill', null, "ARROWS");
+    this.player2 = new Player(this, 2430, 250, 'BlueStill', null, "ARROWS");
     this.player2.texStill = "BlueStill";
     this.player2.texLeft = "BlueLeft";
     this.player2.texRight = "BlueRight";
@@ -291,10 +296,10 @@ export class Map extends Phaser.Scene {
   if (this.network && this.player) {
     const now = this.game.getTime();
     if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
-      this.network.setPlayerState(this.player.x, this.player.y);
-      this.lastNetUpdate = now;
+        this.network.setPlayerState(this.player.x, this.player.y);
+        this.lastNetUpdate = now;
     }
-  }
+}
 }
 // handleInteraction(player) {
 //   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
