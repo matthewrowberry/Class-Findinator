@@ -39,17 +39,28 @@ export class MainScreen extends Phaser.Scene {
         joinButton.on("pointerdown", () => this.startGame(false));
     }
 
+    
+
     startGame(isHost) {
         console.log(isHost ? "Hosting game..." : "Joining game...");
         const sceneRef = this;
         let movedToMap = false;
 
-        // Initialize Photon
-        const photon = new PhotonClient(this);
+        // Disconnect previous client
+        if (window.photon) {
+            window.photon.disconnect();
+            window.photon = null;
+        }
 
-        // --- LOBBY CALLBACK ---
+        const photon = new PhotonClient(this);
+        window.photon = photon;
+
+        // --- Handlers ---
+        photon.onError = (code, msg) => console.error("Photon onError:", code, msg);
+        photon.onStateChange = (state) => console.log("Photon state changed:", state);
+
         photon.onJoinLobby = () => {
-            console.log(isHost ? "HOST: Creating room..." : "JOIN: Joining random room...");
+            console.log("PHOTON: Joined Lobby");
             if (isHost) {
                 photon.createRoom().catch(err => {
                     console.error("Create room failed:", err);
@@ -60,39 +71,37 @@ export class MainScreen extends Phaser.Scene {
                 });
             } else {
                 photon.joinRandomRoom().catch(err => {
-                    console.warn("No room found, auto-creating for testing:", err);
+                    console.warn("No room found, auto-creating:", err);
                     photon.createRoom();
                 });
             }
         };
 
-        // --- ROOM JOINED CALLBACK ---
         photon.onRoomJoinedCallback = (createdByMe) => {
-            console.log("Room joined callback. createdByMe=", createdByMe);
+            console.log("PHOTON: Room joined callback, createdByMe=", createdByMe);
             if (!movedToMap) {
                 movedToMap = true;
                 sceneRef.scene.start("map", { photon });
             }
         };
 
-        // --- SAFETY FALLBACK ---
+        // --- Connect ---
+        if (!photon._publicConnectPending) {
+            photon.connect("us"); // valid region code
+        } else {
+            console.log("Photon connect already in progress, skipping...");
+        }
+
+        // --- Fallback (10s) ---
         setTimeout(() => {
-            if (!photon.isConnected()) {
-                console.log("PHOTON FALLBACK TRIGGERED");
-
-                try {
-                    photon.disconnect();
-                } catch (e) {
-                    console.warn("Photon already closed.");
-                }
-
-                if (!movedToMap) {
-                    movedToMap = true;
-                    this.scene.start("map", { photon: null });
-                }
+            if (!photon.roomJoined && !photon._publicConnectPending) {
+                console.warn("Photon fallback: trying to connect again...");
+                //photon.connect("us");
+                sceneRef.scene.start("map", { photon });
             }
-        }, 3000);
-
-        photon.connect();
+        }, 10000);
     }
+
+    
+    
 }

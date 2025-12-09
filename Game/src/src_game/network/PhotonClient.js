@@ -8,42 +8,52 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
         this.myEventHandler = null;
         this.onRoomJoinedCallback = null;
         this.roomJoined = false;
-        this._connectPending = false;
+
+        // Track public connect separately
+        this._publicConnectPending = false;
+
+        // Use SDK ClientState or fallback
+        this.ClientStateMap = Photon?.LoadBalancing?.ClientState || LocalClientState;
 
         // Bind state change
         this.stateChanged = (state) => this.onStateChange(state);
-
-        // Use SDK ClientState if available, fallback to local mapping
-        this.ClientStateMap = Photon?.LoadBalancing?.ClientState || LocalClientState;
     }
 
-    connect() {
-        if (this.isConnected) return;
-        this.isConnected = true;
+    /**
+     * Connect to Photon region master.
+     * Only triggers warning if your code calls connect() twice.
+     */
+    connect(region = "us") {
+        // Only warn if YOUR code calls connect() twice
+        if (this._publicConnectPending) {
+            console.warn("PhotonClient: connect() called again by code while pending.");
+            return;
+        }
 
-        this._connectPending = true;
-        console.log("PhotonClient.connect: Connecting to Photon (WSS)...");
+        this._publicConnectPending = true;
+
+        // Disconnect old connection if needed
+        if (this.isConnected()) super.disconnect();
+
+        console.log(`PhotonClient.connect: Connecting to region master (${region})...`);
+
         try {
-            this.connectToRegionMaster("us");
+            super.connectToRegionMaster(region);
         } catch (err) {
-            this._connectPending = false;
+            this._publicConnectPending = false;
             console.error("PhotonClient.connect: connectToRegionMaster threw:", err);
         }
     }
 
-    isConnected() {
-        return this.client && this.client.isConnected;
 
+    disconnect() {
+        if (this.isConnected()) super.disconnect();
+        this._publicConnectPending = false;
+        this.roomJoined = false;
     }
 
-    
-    disconnect() {
-        if (this.client && this.client.isConnected) {
-            console.log("PhotonClient.disconnect: Closing Photon connection...");
-            this.client.disconnect();
-        }
-        this.isConnecting = false;
-
+    isConnected() {
+        return this.client && this.client.isConnected;
     }
 
     onStateChange(state) {
@@ -55,12 +65,14 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
 
         if (state === this.ClientStateMap.Joined && this.onRoomJoinedCallback) {
             this.roomJoined = true;
-            this._connectPending = false;
-            this.onRoomJoinedCallback(true); // createdByMe true by default
+            this._publicConnectPending = false;
+            this.onRoomJoinedCallback(true); // default: createdByMe
         }
 
         if (state === this.ClientStateMap.Disconnected) {
-            this._connectPending = false;
+            this._publicConnectPending = false;
+            this.roomJoined = false;
+            console.warn("Photon: Disconnected from server.");
         }
 
         if (super.onStateChange) {
@@ -69,9 +81,9 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
     }
 
     onJoinRoom(createdByMe) {
-        console.log("PhotonClient: Joined Photon room!", createdByMe ? "(Created)" : "(Joined)");
+        console.log("PhotonClient: Joined room", createdByMe ? "(Created)" : "(Joined)");
         this.roomJoined = true;
-        this._connectPending = false;
+        this._publicConnectPending = false;
 
         if (this.onRoomJoinedCallback) {
             try { this.onRoomJoinedCallback(createdByMe); } catch (err) {
@@ -85,7 +97,7 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
     }
 
     onError(errorCode, message) {
-        this._connectPending = false;
+        this._publicConnectPending = false;
         console.error("Photon ERROR:", errorCode, message);
     }
 
@@ -96,5 +108,4 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
             console.warn("setPlayerState.raiseEvent failed:", err);
         }
     }
-    
 }
