@@ -8,14 +8,19 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         scene.add.existing(this);
     
 
-        
+        this.team = 1;
         this.speed = 2;
         // Default animations (can be overridden by scene)
         this.texStill = texture;      // starting texture
         this.texLeft = null;
         this.texRight = null;
 
+        this.texStillFlag = null;
+        this.texLeftFlag = null;
+        this.texRightFlag = null;
+
         this.network = network;
+        this.hasflag = false;
 
         this.setFixedRotation();
         this.setFrictionAir(0.05);
@@ -83,6 +88,8 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         }
 
         // Limit diagonal movement speed
-        
+        // if (this.body.velocity.length() > this.speed) {
+        //     this.body.velocity.normalize().scale(this.speed);
+        // }
     }
 }
