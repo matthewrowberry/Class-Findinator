@@ -7,7 +7,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
         scene.add.existing(this);
     
-
+        
         
         this.speed = 2;
         // Default animations (can be overridden by scene)
@@ -29,14 +29,16 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
                 up: Phaser.Input.Keyboard.KeyCodes.W,
                 down: Phaser.Input.Keyboard.KeyCodes.S,
                 left: Phaser.Input.Keyboard.KeyCodes.A,
-                right: Phaser.Input.Keyboard.KeyCodes.D
+                right: Phaser.Input.Keyboard.KeyCodes.D,
+                run: Phaser.Input.Keyboard.KeyCodes.M
             });
         } else if (controlType === "ARROWS") {
             this.keys = scene.input.keyboard.addKeys({
                 up: Phaser.Input.Keyboard.KeyCodes.UP,
                 down: Phaser.Input.Keyboard.KeyCodes.DOWN,
                 left: Phaser.Input.Keyboard.KeyCodes.LEFT,
-                right: Phaser.Input.Keyboard.KeyCodes.RIGHT
+                right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+                run: Phaser.Input.Keyboard.KeyCodes.L
             });
         }
     }
@@ -47,7 +49,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         let velocity = { x: 0, y: 0 };
 
         let isMoving = false;
-
+        
         const texLeft = this.hasFlag && this.texLeftFlag ? this.texLeftFlag : this.texLeft;
         const texRight = this.hasFlag && this.texRightFlag ? this.texRightFlag : this.texRight;
         const texStill = this.hasFlag && this.texStillFlag ? this.texStillFlag : this.texStill;
@@ -65,6 +67,12 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
             if (this.texRight) this.setTexture(texRight);
         }
+        if (this.keys.run.isDown){
+            this.speed = 4;
+        }else {
+        this.speed = 2;
+    }
+        
 
         // Vertical movement
         if (this.keys.up.isDown) {
