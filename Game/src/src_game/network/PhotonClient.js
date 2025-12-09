@@ -23,7 +23,7 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
      * Connect to Photon region master.
      * Only triggers warning if your code calls connect() twice.
      */
-    connect(region = "us") {
+    connectWrap(region = "us") {
         // Only warn if YOUR code calls connect() twice
         if (this._publicConnectPending) {
             console.warn("PhotonClient: connect() called again by code while pending.");
@@ -63,12 +63,6 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
             this.onJoinLobby();
         }
 
-        if (state === this.ClientStateMap.Joined && this.onRoomJoinedCallback) {
-            this.roomJoined = true;
-            this._publicConnectPending = false;
-            this.onRoomJoinedCallback(true); // default: createdByMe
-        }
-
         if (state === this.ClientStateMap.Disconnected) {
             this._publicConnectPending = false;
             this.roomJoined = false;
@@ -82,15 +76,15 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
 
     onJoinRoom(createdByMe) {
         console.log("PhotonClient: Joined room", createdByMe ? "(Created)" : "(Joined)");
+
         this.roomJoined = true;
         this._publicConnectPending = false;
 
         if (this.onRoomJoinedCallback) {
-            try { this.onRoomJoinedCallback(createdByMe); } catch (err) {
-                console.error("onRoomJoinedCallback threw:", err);
-            }
+            this.onRoomJoinedCallback(createdByMe);
         }
     }
+
 
     onEvent(code, content, actorNr) {
         if (this.myEventHandler) this.myEventHandler(code, content, actorNr);

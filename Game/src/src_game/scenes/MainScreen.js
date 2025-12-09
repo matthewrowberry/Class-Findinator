@@ -2,51 +2,60 @@ import PhotonClient from "../network/PhotonClient.js";
 
 export class MainScreen extends Phaser.Scene {
     constructor() {
-        super({ key: 'MainScreen' });
-        console.log("Constructor")
+        super({ key: "MainScreen" });
     }
 
     create() {
-        console.log("create")
         const { width, height } = this.scale;
 
         // TITLE
-        const title = this.add.text(width / 2, 200, "CAPTURE THE FLAGINATOR", {
+        this.add.text(width / 2, 150, "CAPTURE THE FLAGINATOR", {
             fontSize: "64px",
             color: "#ffffff",
             strokeThickness: 6,
-            padding: { x: 20, y: 10 }
-        }).setOrigin(0.5, 0.5);
+        }).setOrigin(0.5);
 
         // HOST BUTTON
-        const hostButton = this.add.text(width / 2, height / 2, "HOST GAME", {
-            fontSize: '48px',
-            color: '#ffffff',
-            backgroundColor: '#000000',
+        const hostButton = this.add.text(width / 2, height / 2 - 40, "HOST GAME", {
+            fontSize: "48px",
+            color: "#ffffff",
+            backgroundColor: "#000000",
             padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        }).setOrigin(0.5).setInteractive();
 
-        hostButton.on('pointerdown', () => this.startGame(true));
+        hostButton.on("pointerdown", () => this.startGame(true));
 
         // JOIN BUTTON
-        const joinButton = this.add.text(width / 2, height / 2 + 80, "JOIN GAME", {
-            fontSize: '48px',
-            color: '#ffffff',
-            backgroundColor: '#000000',
+        const joinButton = this.add.text(width / 2, height / 2 + 40, "JOIN GAME", {
+            fontSize: "48px",
+            color: "#ffffff",
+            backgroundColor: "#000000",
             padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        }).setOrigin(0.5).setInteractive();
 
         joinButton.on("pointerdown", () => this.startGame(false));
+
+        // ROOM LIST (shown only when joining)
+        this.roomListTitle = this.add.text(width / 2, height / 2 + 150, "", {
+            fontSize: "32px",
+            color: "#ffffff",
+        }).setOrigin(0.5);
+
+        this.roomButtons = [];
+
+        const devButton = this.add.text(50, 50, 'DEV MODE', { fontSize: '32px', fill: '#0f0' })
+            .setInteractive()
+            .on('pointerdown', () => {
+                console.log("DEV BUTTON -> starting MapScene");
+                this.scene.start("map");
+            });
     }
 
-    
-
+    // Start Game (Host or Join)
     startGame(isHost) {
-        console.log(isHost ? "Hosting game..." : "Joining game...");
-        const sceneRef = this;
-        let movedToMap = false;
+        console.log(isHost ? "HOSTING GAME..." : "JOINING GAME...");
 
-        // Disconnect previous client
+        // Destroy previous Photon instance
         if (window.photon) {
             window.photon.disconnect();
             window.photon = null;
@@ -55,53 +64,96 @@ export class MainScreen extends Phaser.Scene {
         const photon = new PhotonClient(this);
         window.photon = photon;
 
-        // --- Handlers ---
-        photon.onError = (code, msg) => console.error("Photon onError:", code, msg);
-        photon.onStateChange = (state) => console.log("Photon state changed:", state);
+        let movedToMap = false;
+        const sceneRef = this;
 
+        // ----------------------
+        //     PHOTON CALLBACKS
+        // ----------------------
+
+        photon.onError = (code, msg) => console.error("Photon ERROR:", code, msg);
+
+        photon.onStateChange = (state) => {
+            console.log("PHOTON STATE:", state);
+        };
+
+        // LOBBY JOINED
         photon.onJoinLobby = () => {
-            console.log("PHOTON: Joined Lobby");
+            console.log("Joined Photon Lobby");
+
             if (isHost) {
-                photon.createRoom().catch(err => {
-                    console.error("Create room failed:", err);
-                    if (!movedToMap) {
-                        movedToMap = true;
-                        sceneRef.scene.start("map", { photon });
-                    }
-                });
+                // Create new room
+                const roomName = "Room_" + Math.floor(Math.random() * 9999);
+                photon.createRoom(roomName);
             } else {
-                photon.joinRandomRoom().catch(err => {
-                    console.warn("No room found, auto-creating:", err);
-                    photon.createRoom();
-                });
+                // JOIN MODE: show room list on screen
+                this.roomListTitle.setText("Available Rooms:");
             }
         };
 
-        photon.onRoomJoinedCallback = (createdByMe) => {
-            console.log("PHOTON: Room joined callback, createdByMe=", createdByMe);
+        // ROOM LIST UPDATE
+        photon.onRoomListUpdate = (rooms) => {
+            console.log("Room List Updated:", rooms);
+            if (!isHost) this.updateRoomList(rooms);
+        };
+
+        // ROOM JOINED
+        photon.onRoomJoinedCallback = () => {
+            console.log("Successfully joined room!");
+
             if (!movedToMap) {
                 movedToMap = true;
                 sceneRef.scene.start("map", { photon });
             }
         };
 
-        // --- Connect ---
-        if (!photon._publicConnectPending) {
-            photon.connect("us"); // valid region code
-        } else {
-            console.log("Photon connect already in progress, skipping...");
-        }
-
-        // --- Fallback (10s) ---
-        setTimeout(() => {
-            if (!photon.roomJoined && !photon._publicConnectPending) {
-                console.warn("Photon fallback: trying to connect again...");
-                //photon.connect("us");
-                sceneRef.scene.start("map", { photon });
-            }
-        }, 10000);
+        // ----------------------
+        //     CONNECT TO PHOTON
+        // ----------------------
+        photon.connectWrap("us");
     }
 
-    
-    
+    // -----------------------------------------
+    // ROOM LIST UI (Join Mode)
+    // -----------------------------------------
+
+    updateRoomList(rooms) {
+        const { width } = this.scale;
+
+        // Clear old room buttons
+        this.roomButtons.forEach(b => b.destroy());
+        this.roomButtons = [];
+
+        let y = this.roomListTitle.y + 40;
+
+        if (!rooms || rooms.length === 0) {
+            const none = this.add.text(width / 2, y, "No rooms available...", {
+                fontSize: "28px",
+                color: "#aaaaaa"
+            }).setOrigin(0.5);
+
+            this.roomButtons.push(none);
+            return;
+        }
+
+        // Create a button for each room
+        rooms.forEach(room => {
+            const btn = this.add.text(width / 2, y, room.name, {
+                fontSize: "36px",
+                color: "#ffffff",
+                backgroundColor: "#222222",
+                padding: { x: 15, y: 8 }
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            btn.on("pointerdown", () => this.joinSelectedRoom(room.name));
+
+            this.roomButtons.push(btn);
+            y += 50;
+        });
+    }
+
+    joinSelectedRoom(roomName) {
+        console.log("JOINING ROOM:", roomName);
+        window.photon.joinRoom(roomName);
+    }
 }
