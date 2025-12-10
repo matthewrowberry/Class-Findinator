@@ -58,10 +58,9 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
     onStateChange(state) {
         console.log("PhotonClient: State Changed:", state);
 
-        // Force join lobby if connected to master
         if (state === this.ClientStateMap.ConnectedToMaster) {
-            console.log("Connected to Master → forcing joinLobby()");
-
+            console.log("Connected to Master → joinLobby()");
+            this.opJoinLobby();
         }
 
         if (state === this.ClientStateMap.JoinedLobby && typeof this.scene.onJoinLobby === "function") {
@@ -71,19 +70,20 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
         if (state === this.ClientStateMap.Joined && typeof this.onRoomJoinedCallback === "function") {
             this.roomJoined = true;
             this._publicConnectPending = false;
-            this.onRoomJoinedCallback(true); // createdByMe
+            this.onRoomJoinedCallback(true);
         }
 
-        if (state === this.ClientStateMap.Disconnected) {
-            this._publicConnectPending = false;
-            this.roomJoined = false;
-            console.warn("PhotonClient: Disconnected from server.");
-        }
+        super.onStateChange?.(state);
+    }
 
-        if (super.onStateChange) {
-            try { super.onStateChange(state); } catch (e) { console.warn("super.onStateChange error:", e); }
+    
+    onRoomListUpdate(rooms) {
+        console.log("PhotonClient: room list updated:", rooms);
+        if (this.onRoomListUpdate) {
+            this.onRoomListUpdate(rooms);
         }
     }
+
 
     onEvent(code, content, actorNr) {
         if (this.myEventHandler) this.myEventHandler(code, content, actorNr);
