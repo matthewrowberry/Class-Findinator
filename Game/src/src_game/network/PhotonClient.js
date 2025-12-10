@@ -13,7 +13,7 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
         this.roomJoined = false;
         this._publicConnectPending = false;
 
-        this.ClientStateMap = Photon?.LoadBalancing?.ClientState || LocalClientState;
+        this.ClientStateMap = this.ClientStateMap = Photon?.LoadBalancing?.LoadBalancingClient?.State; // || LocalClientState
 
         // Bind SDK state change
         this.lbc = this; // alias for clarity
@@ -61,7 +61,7 @@ export default class PhotonClient extends Photon.LoadBalancing.LoadBalancingClie
         // Force join lobby if connected to master
         if (state === this.ClientStateMap.ConnectedToMaster) {
             console.log("Connected to Master → forcing joinLobby()");
-            
+
         }
 
         if (state === this.ClientStateMap.JoinedLobby && typeof this.scene.onJoinLobby === "function") {
