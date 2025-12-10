@@ -83,8 +83,13 @@ export class Map extends Phaser.Scene {
     this.player2.setDepth(3);
     this.player2.hasFlag = false;
 
+<<<<<<< HEAD
     // --- SETUP ---
     this.flag = this.matter.add.sprite(350, 300, 'redflag');
+=======
+    // --- FLAG SETUP ---
+    this.flag = this.matter.add.sprite(750, 800, 'redflag');
+>>>>>>> 2280215392485dc9c65a16a4088457d7914049dc
     this.flag.setScale(0.5);
     this.flag.setRectangle(30, 30);
     this.flag.setCollisionGroup(-1);
@@ -269,7 +274,7 @@ export class Map extends Phaser.Scene {
     this.dropFlag(player);
 
     // Reset flag to starting location
-    this.flag.setPosition(370, 300);
+    this.flag.setPosition(750, 800);
 
     // Add scoreboard here.
   }
