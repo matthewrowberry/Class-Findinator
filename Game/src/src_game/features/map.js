@@ -68,7 +68,7 @@ export class Map extends Phaser.Scene {
     this.player.texLeftFlag = "RedLeftFlag";
     this.player.texRightFlag = "RedRightFlag";
     this.player.setScale(0.25);
-    this.player.setDepth(3);
+    this.player.setDepth(2);
     //this.player.setCollisionGroup(-1);
 
     this.player2 = new Player(this, 2430, 250, 'BlueStill', null, "ARROWS");
@@ -83,13 +83,14 @@ export class Map extends Phaser.Scene {
     this.player2.setDepth(3);
     this.player2.hasFlag = false;
 
-    // --- SETUP ---
+    // --- FLAG SETUP ---
     this.flag = this.matter.add.sprite(350, 300, 'redflag');
     this.flag.setScale(0.5);
     this.flag.setRectangle(30, 30);
     this.flag.setCollisionGroup(-1);
     this.flagHolder = null;
     this.player.hasFlag = false;
+    this.flag.setDepth(1);
 
     // === SCOREBOARD ===
     this.redScore = 0;
@@ -118,14 +119,14 @@ export class Map extends Phaser.Scene {
 
     // --- FLAG DROP-OFF ZONES ---
     const redzonecolor = this.add.graphics();
-    redzonecolor.fillStyle(0xff0000, 1);   // Red, fully opaque
+    redzonecolor.fillStyle(0xff0000, 0.3);   // Red, fully opaque
     redzonecolor.fillCircle(470, 260, 80);
-    redzonecolor.setDepth(2);
+    redzonecolor.setDepth(3);
 
     const bluezonecolor = this.add.graphics();
-    bluezonecolor.fillStyle(0x0000FF, 1);   // Blue, fully opaque
+    bluezonecolor.fillStyle(0x0000FF, 0.3);   // Blue, fully opaque
     bluezonecolor.fillCircle(2330, 1085, 80);
-    bluezonecolor.setDepth(2);
+    bluezonecolor.setDepth(3);
 
 
     this.redDropZone = { x: 470, y: 260, radius: 80 };   // radius in pixels
@@ -259,14 +260,26 @@ export class Map extends Phaser.Scene {
 
   updateOtherPlayer(actorNr, content) {
     if (!this.otherPlayers[actorNr]) {
-      this.otherPlayers[actorNr] = new Player(this, content.x, content.y, 'BlueStill', null);
-      this.otherPlayers[actorNr].setCollisionGroup(-1); // Prevent collisions
+        const other = new Player(this, content.x, content.y, 'BlueStill', null);
+        other.setScale(0.25);          // scale down like your local player
+        other.setDepth(3);              // optional: match depth
+        other.texStill = "BlueStill";   // optional: set textures
+        other.texLeft = "BlueLeft";
+        other.texRight = "BlueRight";
+        other.texStillFlag = "BlueStillFlag";
+        other.texLeftFlag = "BlueLeftFlag";
+        other.texRightFlag = "BlueRightFlag";
+        other.hasFlag = false;
+
+        other.setCollisionGroup(-1);    // Prevent collisions
+        this.otherPlayers[actorNr] = other;
     } else {
-      const other = this.otherPlayers[actorNr];
-      other.x = content.x;
-      other.y = content.y;
+        const other = this.otherPlayers[actorNr];
+        other.x = content.x;
+        other.y = content.y;
     }
-  }
+}
+
 
   pickUpFlag(player) {
     if (this.flagHolder)
