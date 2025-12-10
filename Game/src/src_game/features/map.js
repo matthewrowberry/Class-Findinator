@@ -68,7 +68,7 @@ export class Map extends Phaser.Scene {
     this.player.texLeftFlag = "RedLeftFlag";
     this.player.texRightFlag = "RedRightFlag";
     this.player.setScale(0.25);
-    this.player.setDepth(3);
+    this.player.setDepth(2);
     //this.player.setCollisionGroup(-1);
 
     this.player2 = new Player(this, 2430, 250, 'BlueStill', null, "ARROWS");
@@ -83,24 +83,50 @@ export class Map extends Phaser.Scene {
     this.player2.setDepth(3);
     this.player2.hasFlag = false;
 
-    // --- SETUP ---
+    // --- FLAG SETUP ---
     this.flag = this.matter.add.sprite(350, 300, 'redflag');
     this.flag.setScale(0.5);
     this.flag.setRectangle(30, 30);
     this.flag.setCollisionGroup(-1);
     this.flagHolder = null;
     this.player.hasFlag = false;
+    this.flag.setDepth(1);
+
+    // === SCOREBOARD ===
+    this.redScore = 0;
+    this.blueScore = 0;
+
+    // Just create the objects here
+    this.scoreBox = this.add.graphics();
+    this.scoreBox.setDepth(5);
+    this.scoreBox.setScrollFactor(0);
+
+    this.redScoreText = this.add.text(470, 260, 'Red: 0', {
+        fontSize: '28px',
+        color: '#ff4b4b'
+    })
+
+    this.blueScoreText = this.add.text(470, 260, 'Blue: 0', {
+        fontSize: '28px',
+        color: '#4b9bff'
+    })
+    // Inside create(), after creating the text:
+    this.redScoreText.setScrollFactor(0).setDepth(1000).setScale(1 / this.cameras.main.zoom);
+    this.blueScoreText.setScrollFactor(0).setDepth(1000).setScale(1 / this.cameras.main.zoom);
+    this.scoreBox.setScrollFactor(0).setDepth(999).setScale(1 / this.cameras.main.zoom);
+
+
 
     // --- FLAG DROP-OFF ZONES ---
     const redzonecolor = this.add.graphics();
-    redzonecolor.fillStyle(0xff0000, 1);   // Red, fully opaque
+    redzonecolor.fillStyle(0xff0000, 0.3);   // Red, fully opaque
     redzonecolor.fillCircle(470, 260, 80);
-    redzonecolor.setDepth(2);
+    redzonecolor.setDepth(3);
 
     const bluezonecolor = this.add.graphics();
-    bluezonecolor.fillStyle(0x0000FF, 1);   // Blue, fully opaque
+    bluezonecolor.fillStyle(0x0000FF, 0.3);   // Blue, fully opaque
     bluezonecolor.fillCircle(2330, 1085, 80);
-    bluezonecolor.setDepth(2);
+    bluezonecolor.setDepth(3);
 
 
     this.redDropZone = { x: 470, y: 260, radius: 80 };   // radius in pixels
@@ -234,14 +260,26 @@ export class Map extends Phaser.Scene {
 
   updateOtherPlayer(actorNr, content) {
     if (!this.otherPlayers[actorNr]) {
-      this.otherPlayers[actorNr] = new Player(this, content.x, content.y, 'BlueStill', null);
-      this.otherPlayers[actorNr].setCollisionGroup(-1); // Prevent collisions
+        const other = new Player(this, content.x, content.y, 'BlueStill', null);
+        other.setScale(0.25);          // scale down like your local player
+        other.setDepth(3);              // optional: match depth
+        other.texStill = "BlueStill";   // optional: set textures
+        other.texLeft = "BlueLeft";
+        other.texRight = "BlueRight";
+        other.texStillFlag = "BlueStillFlag";
+        other.texLeftFlag = "BlueLeftFlag";
+        other.texRightFlag = "BlueRightFlag";
+        other.hasFlag = false;
+
+        other.setCollisionGroup(-1);    // Prevent collisions
+        this.otherPlayers[actorNr] = other;
     } else {
-      const other = this.otherPlayers[actorNr];
-      other.x = content.x;
-      other.y = content.y;
+        const other = this.otherPlayers[actorNr];
+        other.x = content.x;
+        other.y = content.y;
     }
-  }
+}
+
 
   pickUpFlag(player) {
     if (this.flagHolder)
@@ -271,8 +309,28 @@ export class Map extends Phaser.Scene {
     // Reset flag to starting location
     this.flag.setPosition(370, 300);
 
-    // Add scoreboard here.
+    // Add scores
+    if (player === this.player) {
+    this.updateRedScore(1);
+    } 
+    else {
+    this.updateBlueScore(1);
+    }
+
   }
+
+  updateRedScore(points) {
+    this.redScore += points;
+    this.redScoreText.setText('Red: ' + this.redScore);
+    console.log("Red Score:", this.redScore);
+  }
+
+  updateBlueScore(points) {
+    this.blueScore += points;
+    this.blueScoreText.setText('Blue: ' + this.blueScore);
+    console.log("Blue Score:", this.blueScore);
+  }
+
 
   respawn(player) {
     this.x = 100;
@@ -280,6 +338,21 @@ export class Map extends Phaser.Scene {
   }
 
   update() {
+  // Scoreboard update
+  const cam = this.cameras.main;
+  const boxX = cam.width - 260 - 20; // 20px from right
+  const boxY = 20;                   // 20px from top
+
+  this.scoreBox.clear();
+  this.scoreBox.fillStyle(0x000000, 0.5);
+  this.scoreBox.fillRoundedRect(boxX, boxY, 260, 70, 10);
+
+  this.redScoreText.setPosition(boxX + 10, boxY + 10);
+  this.blueScoreText.setPosition(boxX + 10, boxY + 40);
+
+
+
+  // Update players
   if (this.player) this.player.update();
   if (this.player2) this.player2.update();
 
@@ -354,20 +427,5 @@ export class Map extends Phaser.Scene {
     }
 }
 }
-// handleInteraction(player) {
-//   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
-
-//   // Picking up the flag
-//   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
-//     this.pickUpFlag(player);
-//     return;
-//   }
-
-//   // Dropping the flag
-//   if (player.hasFlag) {
-//     this.dropFlag(player);
-//     return;
-//   }
-// }
 
 }
