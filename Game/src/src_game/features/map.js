@@ -91,6 +91,31 @@ export class Map extends Phaser.Scene {
     this.flagHolder = null;
     this.player.hasFlag = false;
 
+    // === SCOREBOARD ===
+    this.redScore = 0;
+    this.blueScore = 0;
+
+    // Just create the objects here
+    this.scoreBox = this.add.graphics();
+    this.scoreBox.setDepth(5);
+    this.scoreBox.setScrollFactor(0);
+
+    this.redScoreText = this.add.text(470, 260, 'Red: 0', {
+        fontSize: '28px',
+        color: '#ff4b4b'
+    })
+
+    this.blueScoreText = this.add.text(470, 260, 'Blue: 0', {
+        fontSize: '28px',
+        color: '#4b9bff'
+    })
+    // Inside create(), after creating the text:
+    this.redScoreText.setScrollFactor(0).setDepth(1000).setScale(1 / this.cameras.main.zoom);
+    this.blueScoreText.setScrollFactor(0).setDepth(1000).setScale(1 / this.cameras.main.zoom);
+    this.scoreBox.setScrollFactor(0).setDepth(999).setScale(1 / this.cameras.main.zoom);
+
+
+
     // --- FLAG DROP-OFF ZONES ---
     const redzonecolor = this.add.graphics();
     redzonecolor.fillStyle(0xff0000, 1);   // Red, fully opaque
@@ -271,8 +296,28 @@ export class Map extends Phaser.Scene {
     // Reset flag to starting location
     this.flag.setPosition(370, 300);
 
-    // Add scoreboard here.
+    // Add scores
+    if (player === this.player) {
+    this.updateRedScore(1);
+    } 
+    else {
+    this.updateBlueScore(1);
+    }
+
   }
+
+  updateRedScore(points) {
+    this.redScore += points;
+    this.redScoreText.setText('Red: ' + this.redScore);
+    console.log("Red Score:", this.redScore);
+  }
+
+  updateBlueScore(points) {
+    this.blueScore += points;
+    this.blueScoreText.setText('Blue: ' + this.blueScore);
+    console.log("Blue Score:", this.blueScore);
+  }
+
 
   respawn(player) {
     this.x = 100;
@@ -280,6 +325,21 @@ export class Map extends Phaser.Scene {
   }
 
   update() {
+  // Scoreboard update
+  const cam = this.cameras.main;
+  const boxX = cam.width - 260 - 20; // 20px from right
+  const boxY = 20;                   // 20px from top
+
+  this.scoreBox.clear();
+  this.scoreBox.fillStyle(0x000000, 0.5);
+  this.scoreBox.fillRoundedRect(boxX, boxY, 260, 70, 10);
+
+  this.redScoreText.setPosition(boxX + 10, boxY + 10);
+  this.blueScoreText.setPosition(boxX + 10, boxY + 40);
+
+
+
+  // Update players
   if (this.player) this.player.update();
   if (this.player2) this.player2.update();
 
@@ -354,20 +414,5 @@ export class Map extends Phaser.Scene {
     }
 }
 }
-// handleInteraction(player) {
-//   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
-
-//   // Picking up the flag
-//   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
-//     this.pickUpFlag(player);
-//     return;
-//   }
-
-//   // Dropping the flag
-//   if (player.hasFlag) {
-//     this.dropFlag(player);
-//     return;
-//   }
-// }
 
 }
