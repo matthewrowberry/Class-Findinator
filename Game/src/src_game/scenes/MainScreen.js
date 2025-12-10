@@ -44,12 +44,12 @@ export class MainScreen extends Phaser.Scene {
         this.roomButtons = [];
 
         // DEV MODE
-        const devButton = this.add.text(50, 50, 'DEV MODE', { fontSize: '32px', fill: '#0f0' })
-            .setInteractive()
-            .on('pointerdown', () => {
-                console.log("DEV BUTTON -> starting MapScene");
-                this.scene.start("map");
-            });
+        // const devButton = this.add.text(50, 50, 'DEV MODE', { fontSize: '32px', fill: '#0f0' })
+        //     .setInteractive()
+        //     .on('pointerdown', () => {
+        //         console.log("DEV BUTTON -> starting MapScene");
+        //         this.scene.start("map");
+        //     });
     }
 
     // -------------------------

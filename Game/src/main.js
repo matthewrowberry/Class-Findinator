@@ -19,8 +19,8 @@ const config = {
         matter: {
             gravity: { y: 0 },
             debug: {
-                showBody: true,          // Ensures dynamic bodies show
-                showStaticBody: true,    // Ensures static walls show
+                showBody: false,          // Ensures dynamic bodies show
+                showStaticBody: false,    // Ensures static walls show
                 renderLine: false,        // Draw outlines (default anyway)
                 lineThickness: 3,        // Increase from default 1 for visibility
                 lineColor: 0xff0000,     // Red for dynamic bodies
