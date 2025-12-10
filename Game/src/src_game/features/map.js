@@ -68,7 +68,8 @@ export class Map extends Phaser.Scene {
     this.player.texLeftFlag = "RedLeftFlag";
     this.player.texRightFlag = "RedRightFlag";
     this.player.setScale(0.25);
-    this.player.setCollisionGroup(-1);
+    this.player.setDepth(3);
+    //this.player.setCollisionGroup(-1);
 
     this.player2 = new Player(this, 2430, 250, 'BlueStill', null, "ARROWS");
     this.player2.texStill = "BlueStill";
@@ -78,19 +79,32 @@ export class Map extends Phaser.Scene {
     this.player2.texLeftFlag = "BlueLeftFlag";
     this.player2.texRightFlag = "BlueRightFlag";
     this.player2.setScale(0.25);
-    this.player2.setCollisionGroup(-1); // Prevent player-player collisions
-    this.player2.setDepth(2);
+    //this.player2.setCollisionGroup(-1); // Prevent player-player collisions
+    this.player2.setDepth(3);
     this.player2.hasFlag = false;
 
-    this.player.setDepth(2);
-
-    // --- FLAG SETUP ---
+    // --- SETUP ---
     this.flag = this.matter.add.sprite(350, 300, 'redflag');
     this.flag.setScale(0.5);
     this.flag.setRectangle(30, 30);
     this.flag.setCollisionGroup(-1);
     this.flagHolder = null;
     this.player.hasFlag = false;
+
+    // --- FLAG DROP-OFF ZONES ---
+    const redzonecolor = this.add.graphics();
+    redzonecolor.fillStyle(0xff0000, 1);   // Red, fully opaque
+    redzonecolor.fillCircle(470, 260, 80);
+    redzonecolor.setDepth(2);
+
+    const bluezonecolor = this.add.graphics();
+    bluezonecolor.fillStyle(0x0000FF, 1);   // Blue, fully opaque
+    bluezonecolor.fillCircle(2330, 1085, 80);
+    bluezonecolor.setDepth(2);
+
+
+    this.redDropZone = { x: 470, y: 260, radius: 80 };   // radius in pixels
+    this.blueDropZone = { x: 2330, y: 1085, radius: 80 };
 
     // --- MAP GENERATION ---
     const lons = [], lats = [];
@@ -199,7 +213,7 @@ export class Map extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setBounds(0, 0, mapWidth, mapHeight);
     cam.startFollow(this.player);
-    cam.setZoom(8);
+    cam.setZoom(6);
 
     // --- INPUT ---
     this.keys = this.input.keyboard.addKeys({ up: "W", down: "S", left: "A", right: "D" });
@@ -248,6 +262,23 @@ export class Map extends Phaser.Scene {
     this.matter.world.add(this.flag.body);
   }
 
+  scoreFlag(player) {
+    console.log(`${player === this.player ? "Red" : "Blue"} team scored!`);
+
+    // Drop the flag visually and reset holder
+    this.dropFlag(player);
+
+    // Reset flag to starting location
+    this.flag.setPosition(370, 300);
+
+    // Add scoreboard here.
+  }
+
+  respawn(player) {
+    this.x = 100;
+    this.y = 100;
+  }
+
   update() {
   if (this.player) this.player.update();
   if (this.player2) this.player2.update();
@@ -258,7 +289,7 @@ export class Map extends Phaser.Scene {
     const distToFlag = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.flag.x, this.flag.y);
     if (!this.player.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
         this.pickUpFlag(this.player);
-    }
+      }
 
     // Try to tag Player 2 if they have the flag
     if (this.player2.hasFlag) {
@@ -266,7 +297,18 @@ export class Map extends Phaser.Scene {
         if (distToPlayer2 < this.FLAG_PICKUP_RADIUS) {
             this.dropFlag(this.player2);
         }
-    }
+      }
+
+    // --- Check Red Team drop-off ---
+    if (this.player.hasFlag) {
+        const distToRedZone = Phaser.Math.Distance.Between(
+            this.player.x, this.player.y,
+            this.redDropZone.x, this.redDropZone.y
+        );
+        if (distToRedZone < this.redDropZone.radius) {
+            this.scoreFlag(this.player);
+        }
+      }
   }
 
   // === INTERACTION FOR PLAYER 2 ===
@@ -283,7 +325,18 @@ export class Map extends Phaser.Scene {
         if (distToPlayer1 < this.FLAG_PICKUP_RADIUS) {
             this.dropFlag(this.player);
         }
-    }
+      }
+
+      // --- Check Blue Team drop-off ---
+    if (this.player2.hasFlag) {
+        const distToBlueZone = Phaser.Math.Distance.Between(
+            this.player2.x, this.player2.y,
+            this.blueDropZone.x, this.blueDropZone.y
+        );
+        if (distToBlueZone < this.blueDropZone.radius) {
+            this.scoreFlag(this.player2);
+        }
+      }
   }
 
   // Flag follow logic

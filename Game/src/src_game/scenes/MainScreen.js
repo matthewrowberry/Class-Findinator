@@ -43,6 +43,7 @@ export class MainScreen extends Phaser.Scene {
 
         this.roomButtons = [];
 
+        // DEV MODE BUTTON
         const devButton = this.add.text(50, 50, 'DEV MODE', { fontSize: '32px', fill: '#0f0' })
             .setInteractive()
             .on('pointerdown', () => {
@@ -51,7 +52,9 @@ export class MainScreen extends Phaser.Scene {
             });
     }
 
+    // -------------------------
     // Start Game (Host or Join)
+    // -------------------------
     startGame(isHost) {
         console.log(isHost ? "HOSTING GAME..." : "JOINING GAME...");
 
@@ -63,44 +66,48 @@ export class MainScreen extends Phaser.Scene {
 
         const photon = new PhotonClient(this);
         window.photon = photon;
-
-        let movedToMap = false;
         const sceneRef = this;
+        let movedToMap = false;
 
         // ----------------------
-        //     PHOTON CALLBACKS
+        // PHOTON CALLBACKS
         // ----------------------
-
         photon.onError = (code, msg) => console.error("Photon ERROR:", code, msg);
 
         photon.onStateChange = (state) => {
             console.log("PHOTON STATE:", state);
-        };
 
-        // LOBBY JOINED
-        photon.onJoinLobby = () => {
-            console.log("Joined Photon Lobby");
+            // Instead of calling joinLobby manually:
+            if (state === photon.ClientStateMap.JoinedLobby) {
+                console.log("Joined Lobby, ready to create or join a room");
 
-            if (isHost) {
-                // Create new room
-                const roomName = "Room_" + Math.floor(Math.random() * 9999);
-                photon.createRoom(roomName);
-            } else {
-                // JOIN MODE: show room list on screen
-                this.roomListTitle.setText("Available Rooms:");
+                if (isHost) {
+                    const roomName = "Room_" + Math.floor(Math.random() * 9999);
+                    photon.createRoom(roomName)
+                        .then(() => {
+                            console.log("Room created:", roomName);
+                            if (!movedToMap) {
+                                movedToMap = true;
+                                sceneRef.scene.start("map", { photon });
+                            }
+                        })
+                        .catch(err => console.error("Create room failed:", err));
+                } else {
+                    this.roomListTitle.setText("Available Rooms:");
+                    // The SDK automatically triggers onRoomListUpdate when rooms exist
+                }
             }
         };
 
-        // ROOM LIST UPDATE
+        // Update room list when in join mode
         photon.onRoomListUpdate = (rooms) => {
             console.log("Room List Updated:", rooms);
             if (!isHost) this.updateRoomList(rooms);
         };
 
-        // ROOM JOINED
+        // Room joined callback → open map
         photon.onRoomJoinedCallback = () => {
             console.log("Successfully joined room!");
-
             if (!movedToMap) {
                 movedToMap = true;
                 sceneRef.scene.start("map", { photon });
@@ -108,7 +115,7 @@ export class MainScreen extends Phaser.Scene {
         };
 
         // ----------------------
-        //     CONNECT TO PHOTON
+        // Connect to Photon
         // ----------------------
         photon.connectWrap("us");
     }
@@ -116,7 +123,6 @@ export class MainScreen extends Phaser.Scene {
     // -----------------------------------------
     // ROOM LIST UI (Join Mode)
     // -----------------------------------------
-
     updateRoomList(rooms) {
         const { width } = this.scale;
 
@@ -157,3 +163,14 @@ export class MainScreen extends Phaser.Scene {
         window.photon.joinRoom(roomName);
     }
 }
+
+
+
+
+
+// const devButton = this.add.text(50, 50, 'DEV MODE', { fontSize: '32px', fill: '#0f0' })
+//             .setInteractive()
+//             .on('pointerdown', () => {
+//                 console.log("DEV BUTTON -> starting MapScene");
+//                 this.scene.start("map");
+//             });
