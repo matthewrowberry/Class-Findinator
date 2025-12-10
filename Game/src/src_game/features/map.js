@@ -11,10 +11,9 @@ export class Map extends Phaser.Scene {
 
     // Only set scene if network exists
     if (this.network) {
-        this.network.scene = this;
+      this.network.scene = this;
     }
-}
-
+  }
 
   preload() {
     this.load.json("testMap", "src/src_game/assets/Final.geojson");
@@ -46,16 +45,15 @@ export class Map extends Phaser.Scene {
 
     // PHOTON NETWORK HANDLER
     if (this.network) {
-        console.log("Photon network received in Map Scene.");
-        this.network.myEventHandler = (code, content, actorNr) => {
-            if (code === 1) this.updateOtherPlayer(actorNr, content);
-        };
-        // Optional: Ready callback
-        this.network.onNetworkReady = (client) => {
-            console.log("Network fully ready!");
-        };
+      console.log("Photon network received in Map Scene.");
+      this.network.myEventHandler = (code, content, actorNr) => {
+        if (code === 1) this.updateOtherPlayer(actorNr, content);
+      };
+      // Optional: Ready callback
+      this.network.onNetworkReady = (client) => {
+        console.log("Network fully ready!");
+      };
     }
-
 
     this.otherPlayers = {};
 
@@ -83,13 +81,8 @@ export class Map extends Phaser.Scene {
     this.player2.setDepth(3);
     this.player2.hasFlag = false;
 
-<<<<<<< HEAD
-    // --- SETUP ---
-    this.flag = this.matter.add.sprite(350, 300, 'redflag');
-=======
     // --- FLAG SETUP ---
     this.flag = this.matter.add.sprite(750, 800, 'redflag');
->>>>>>> 2280215392485dc9c65a16a4088457d7914049dc
     this.flag.setScale(0.5);
     this.flag.setRectangle(30, 30);
     this.flag.setCollisionGroup(-1);
@@ -106,7 +99,6 @@ export class Map extends Phaser.Scene {
     bluezonecolor.fillStyle(0x0000FF, 1);   // Blue, fully opaque
     bluezonecolor.fillCircle(2330, 1085, 80);
     bluezonecolor.setDepth(2);
-
 
     this.redDropZone = { x: 470, y: 260, radius: 80 };   // radius in pixels
     this.blueDropZone = { x: 2330, y: 1085, radius: 80 };
@@ -220,6 +212,18 @@ export class Map extends Phaser.Scene {
     cam.startFollow(this.player);
     cam.setZoom(6);
 
+    // --- SCOREBOARD SETUP --- (New: Initialize scores and add fixed UI text)
+    this.redScore = 0;
+    this.blueScore = 0;
+    // After creating the scoreboard text, add them to a fixed camera
+    const uiCamera = this.cameras.add(0, 0, canvasWidth, canvasHeight);
+    uiCamera.ignore([graphics, this.player, this.player2, this.flag, redzonecolor, bluezonecolor]);
+    this.redScoreText = this.add.text(10, 10, 'Red: 0', { fontSize: '32px', fill: '#FF0000' });
+    this.redScoreText.setDepth(100);
+
+    this.blueScoreText = this.add.text(canvasWidth - 150, 10, 'Blue: 0', { fontSize: '32px', fill: '#0000FF' });
+    this.blueScoreText.setDepth(100);
+
     // --- INPUT ---
     this.keys = this.input.keyboard.addKeys({ up: "W", down: "S", left: "A", right: "D" });
     this.keys2 = this.input.keyboard.addKeys({ up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT" });
@@ -241,6 +245,7 @@ export class Map extends Phaser.Scene {
     if (!this.otherPlayers[actorNr]) {
       this.otherPlayers[actorNr] = new Player(this, content.x, content.y, 'BlueStill', null);
       this.otherPlayers[actorNr].setCollisionGroup(-1); // Prevent collisions
+      this.otherPlayers[actorNr].setScale(0.25);
     } else {
       const other = this.otherPlayers[actorNr];
       other.x = content.x;
@@ -270,109 +275,117 @@ export class Map extends Phaser.Scene {
   scoreFlag(player) {
     console.log(`${player === this.player ? "Red" : "Blue"} team scored!`);
 
+    // New: Increment the appropriate score and update the text
+    if (player === this.player) {
+      this.redScore++;
+      this.redScoreText.setText('Red: ' + this.redScore);
+    } else {
+      this.blueScore++;
+      this.blueScoreText.setText('Blue: ' + this.blueScore);
+    }
+
     // Drop the flag visually and reset holder
     this.dropFlag(player);
 
     // Reset flag to starting location
     this.flag.setPosition(750, 800);
 
-    // Add scoreboard here.
   }
 
   respawn(player) {
-    this.x = 100;
-    this.y = 100;
+    player.x = 100;
+    player.y = 100;
   }
 
   update() {
-  if (this.player) this.player.update();
-  if (this.player2) this.player2.update();
+    if (this.player) this.player.update();
+    if (this.player2) this.player2.update();
 
-  // === INTERACTION FOR PLAYER 1 ===
-  if (Phaser.Input.Keyboard.JustDown(this.interactP1)) {
-    // Try to pick up flag if nearby
-    const distToFlag = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.flag.x, this.flag.y);
-    if (!this.player.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
+    // === INTERACTION FOR PLAYER 1 ===
+    if (Phaser.Input.Keyboard.JustDown(this.interactP1)) {
+      // Try to pick up flag if nearby
+      const distToFlag = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.flag.x, this.flag.y);
+      if (!this.player.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
         this.pickUpFlag(this.player);
       }
 
-    // Try to tag Player 2 if they have the flag
-    if (this.player2.hasFlag) {
+      // Try to tag Player 2 if they have the flag
+      if (this.player2.hasFlag) {
         const distToPlayer2 = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.player2.x, this.player2.y);
         if (distToPlayer2 < this.FLAG_PICKUP_RADIUS) {
-            this.dropFlag(this.player2);
+          this.dropFlag(this.player2);
         }
       }
 
-    // --- Check Red Team drop-off ---
-    if (this.player.hasFlag) {
+      // --- Check Red Team drop-off ---
+      if (this.player.hasFlag) {
         const distToRedZone = Phaser.Math.Distance.Between(
-            this.player.x, this.player.y,
-            this.redDropZone.x, this.redDropZone.y
+          this.player.x, this.player.y,
+          this.redDropZone.x, this.redDropZone.y
         );
         if (distToRedZone < this.redDropZone.radius) {
-            this.scoreFlag(this.player);
+          this.scoreFlag(this.player);
         }
       }
-  }
-
-  // === INTERACTION FOR PLAYER 2 ===
-  if (Phaser.Input.Keyboard.JustDown(this.interactP2)) {
-    // Try to pick up flag if nearby
-    const distToFlag = Phaser.Math.Distance.Between(this.player2.x, this.player2.y, this.flag.x, this.flag.y);
-    if (!this.player2.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
-        this.pickUpFlag(this.player2);
     }
 
-    // Try to tag Player 1 if they have the flag
-    if (this.player.hasFlag) {
+    // === INTERACTION FOR PLAYER 2 ===
+    if (Phaser.Input.Keyboard.JustDown(this.interactP2)) {
+      // Try to pick up flag if nearby
+      const distToFlag = Phaser.Math.Distance.Between(this.player2.x, this.player2.y, this.flag.x, this.flag.y);
+      if (!this.player2.hasFlag && !this.flagHolder && distToFlag < this.FLAG_PICKUP_RADIUS) {
+        this.pickUpFlag(this.player2);
+      }
+
+      // Try to tag Player 1 if they have the flag
+      if (this.player.hasFlag) {
         const distToPlayer1 = Phaser.Math.Distance.Between(this.player2.x, this.player2.y, this.player.x, this.player.y);
         if (distToPlayer1 < this.FLAG_PICKUP_RADIUS) {
-            this.dropFlag(this.player);
+          this.dropFlag(this.player);
         }
       }
 
       // --- Check Blue Team drop-off ---
-    if (this.player2.hasFlag) {
+      if (this.player2.hasFlag) {
         const distToBlueZone = Phaser.Math.Distance.Between(
-            this.player2.x, this.player2.y,
-            this.blueDropZone.x, this.blueDropZone.y
+          this.player2.x, this.player2.y,
+          this.blueDropZone.x, this.blueDropZone.y
         );
         if (distToBlueZone < this.blueDropZone.radius) {
-            this.scoreFlag(this.player2);
+          this.scoreFlag(this.player2);
         }
       }
-  }
+    }
 
-  // Flag follow logic
-  if (this.flagHolder) {
-    this.flag.x = this.flagHolder.x;
-    this.flag.y = this.flagHolder.y;
-  }
+    // Flag follow logic
+    if (this.flagHolder) {
+      this.flag.x = this.flagHolder.x;
+      this.flag.y = this.flagHolder.y;
+    }
 
-  // Network updates...
-  if (this.network && this.player) {
-    const now = this.game.getTime();
-    if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
+    // Network updates...
+    if (this.network && this.player) {
+      const now = this.game.getTime();
+      if (!this.lastNetUpdate || now - this.lastNetUpdate > 50) {
         this.network.setPlayerState(this.player.x, this.player.y);
         this.lastNetUpdate = now;
+      }
     }
-}
-}
-// handleInteraction(player) {
-//   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
+  }
+  // handleInteraction(player) {
+  //   const dist = Phaser.Math.Distance.Between(player.x, player.y, this.flag.x, this.flag.y);
 
-//   // Picking up the flag
-//   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
-//     this.pickUpFlag(player);
-//     return;
-//   }
+  //   // Picking up the flag
+  //   if (!player.hasFlag && dist < this.FLAG_PICKUP_RADIUS) {
+  //     this.pickUpFlag(player);
+  //     return;
+  //   }
 
-//   // Dropping the flag
-//   if (player.hasFlag) {
-//     this.dropFlag(player);
-//     return;
-//   }
-// }
+  //   // Dropping the flag
+  //   if (player.hasFlag) {
+  //     this.dropFlag(player);
+  //     return;
+  //   }
+  // }
 
 }
