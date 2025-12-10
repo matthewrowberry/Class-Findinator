@@ -57,7 +57,7 @@ export class MainScreen extends Phaser.Scene {
     // -------------------------
     startGame(isHost) {
         console.log(isHost ? "HOSTING GAME..." : "JOINING GAME...");
-
+        console.log(isHost);
         if (window.photon) {
             window.photon.disconnect();
             window.photon = null;
@@ -70,30 +70,38 @@ export class MainScreen extends Phaser.Scene {
 
         // Callbacks
         photon.onError = (code, msg) => console.error("Photon ERROR:", code, msg);
+        console.log(isHost);
+        photon.onStateChange = (state) => {
+            console.log("State " + state);
+            if (state == 5) {
+                console.log("Joined Lobby");
+                console.log(isHost);
+                if (isHost) {
+                    console.log("hi");
+                    const roomName = "Room_" + Math.floor(Math.random() * 9999);
+                    console.log("Creating room:", roomName);
+                    photon.createRoom(roomName, { maxPlayers: 4 });
 
-        photon.onJoinLobby = () => {
-            console.log("Joined Lobby");
+                } else {
+                    // Joiner mode: show room list
+                    this.roomListTitle.setText("Available Rooms:");
 
-            if (isHost) {
-                const roomName = "Room_" + Math.floor(Math.random() * 9999);
-                console.log("Creating room:", roomName);
-                photon.createRoom(roomName, { maxPlayers: 4 });
-            } else {
-                // Joiner mode: show room list
-                this.roomListTitle.setText("Available Rooms:");
-
-                // Periodically refresh room list (every 2 seconds)
-                this.roomListInterval = setInterval(() => {
-                    if (window.photon && window.photon.isConnected()) {
-                        // Some SDKs automatically update room list, others may need a refresh call
-                        if (window.photon.getRoomList) {
-                            window.photon.getRoomList();
+                    // Periodically refresh room list (every 2 seconds)
+                    this.roomListInterval = setInterval(() => {
+                        if (window.photon && window.photon.isConnected()) {
+                            // Some SDKs automatically update room list, others may need a refresh call
+                            if (window.photon.getRoomList) {
+                                window.photon.getRoomList();
+                            }
                         }
-                    }
-                }, 2000);
+                    }, 2000);
+                }
             }
         };
 
+        photon.OnJoinRoomFailed = () => {
+            console.log("Failed to join room");
+        }
 
         photon.onRoomListUpdate = (rooms) => {
             console.log("Room List Updated:", rooms);
