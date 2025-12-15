@@ -34,14 +34,14 @@ To recreate the development environment, you need the following software and/or 
 
 I found these websites useful in developing this software:
 
-* [Website Title](Link)
-*
-*
+* [Photon](https://dashboard.photonengine.com)
+* [Phaser](https://phaser.io)
+* [Leaflet](https://leafletjs.com)
 
 ## Future Work
 
 The following items I plan to fix, improve, and/or add to this project in the future:
 
-* [ ] First thing here
-* [ ]
-* [ ]
+* [x] Make players sprites in sinc on their movements.
+* [x] Add more gameplay mechanics like limit sprint length, and tagging so players can send others to jail.
+* [x] Create a lobby screen when you join a game.
